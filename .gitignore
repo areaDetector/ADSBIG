@@ -34,3 +34,6 @@ extensions/src/cothread/cothread/_coroutine.so
 extensions/src/cothread/cothread/libca_path.py
 extensions/src/cothread/dist/
 
+#Built files in vendor directory
+*.o
+
