@@ -1,1 +1,19 @@
 
+######################################################################
+#
+# Template file for the SBIG areaDetector driver.
+#
+# Matt Pearson 
+# Feb 16
+#
+# Macros:
+# P,R - Base PV name
+# PORT - Asyn port name
+# ADDR - Asyn address (set to zero)
+# TIMEOUT - Asyn timeout
+#
+#
+######################################################################
+
+include "ADBase.template"
+
