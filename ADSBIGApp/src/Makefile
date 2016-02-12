@@ -9,7 +9,7 @@ include $(TOP)/configure/CONFIG
 
 USR_CXXFLAGS += -Wunused-but-set-variable
 
-#LIBRARY_IOC += ADSBIGSupport
+LIBRARY_IOC += ADSBIGSupport
 
 # xxxRecord.h will be created from xxxRecord.dbd
 #DBDINC += xxxRecord
@@ -17,7 +17,7 @@ USR_CXXFLAGS += -Wunused-but-set-variable
 #DBD += xxxSupport.dbd
 
 # Compile and add the code to the support library
-#ADSBIGSupport_SRCS += xxxRecord.c
+ADSBIGSupport_SRCS += ADSBIG.cpp
 
 # Link locally-provided code into the support library,
 # rather than directly into the IOC application.
