@@ -211,7 +211,7 @@ void ADSBIG::readoutTask(void)
 
     eventStatus = epicsEventWait(m_startEvent);          
     if (eventStatus == epicsEventWaitOK) {
-      printf("Got start event.");
+      printf("Got start event.\n");
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Got Start Event.\n", functionName);
       acquire = true;
       error = false;
