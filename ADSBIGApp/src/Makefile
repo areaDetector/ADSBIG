@@ -14,7 +14,7 @@ LIBRARY_IOC += ADSBIGSupport
 # xxxRecord.h will be created from xxxRecord.dbd
 #DBDINC += xxxRecord
 # Install devXxxSoft.dbd into <top>/dbd
-#DBD += xxxSupport.dbd
+DBD += ADSBIGSupport.dbd
 
 # Compile and add the code to the support library
 ADSBIGSupport_SRCS += ADSBIG.cpp

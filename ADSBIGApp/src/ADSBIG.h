@@ -14,7 +14,22 @@
 
 #include <stddef.h>
 
+#include <epicsTime.h>
+#include <epicsTypes.h>
+#include <epicsThread.h>
+#include <epicsEvent.h>
+#include <epicsMutex.h>
+#include <epicsString.h>
+#include <epicsStdio.h>
+#include <cantProceed.h>
+
+#include <asynOctetSyncIO.h>
+
 #include "ADDriver.h"
+
+#define ADSBIGFirstParamString              "ADSBIG_FIRST"
+#define ADSBIGStartParamString               "ADSBIG_START"
+#define ADSBIGLastParamString               "ADSBIG_LAST"
 
 class ADSBIG : public ADDriver {
 
@@ -24,14 +39,27 @@ class ADSBIG : public ADDriver {
 
   virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
   virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
+
   virtual void report(FILE *fp, int details);
+
+  void readoutTask(void); 
 
  private:
   
+  //Private functions go here
+
+  //Private static data members
+
+  //Private dynamic data members
+  epicsUInt32 m_Acquiring;
+
+  epicsEventId m_startEvent;
+  epicsEventId m_stopEvent;
+
   //Parameter library indices
   int ADSBIGFirstParam;
   #define ADSBIG_FIRST_PARAM ADSBIGFirstParam
-
+  int ADSBIGStartParam;
   int ADSBIGLastParam;
   #define ADSBIG_LAST_PARAM ADSBIGLastParam
   
