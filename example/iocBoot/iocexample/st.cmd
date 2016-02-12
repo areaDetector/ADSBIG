@@ -11,18 +11,43 @@ cd ${TOP}
 dbLoadDatabase "dbd/example.dbd"
 example_registerRecordDeviceDriver pdbbase
 
+#################################################
+# Set up the SBIG driver
+
+ADSBIGConfig("S1",-1,-1)
+
+#################################################
+
+#################################################
+# autosave
+
+epicsEnvSet IOCNAME example
+epicsEnvSet SAVE_DIR /tmp/example
+
+save_restoreSet_Debug(0)
+
+### status-PV prefix, so save_restore can find its status PV's.
+save_restoreSet_status_prefix("BL99:CS:ADSBIG")
+
+set_requestfile_path("$(SAVE_DIR)")
+set_savefile_path("$(SAVE_DIR)")
+
+save_restoreSet_NumSeqFiles(3)
+save_restoreSet_SeqPeriodInSeconds(600)
+set_pass0_restoreFile("$(IOCNAME).sav")
+set_pass1_restoreFile("$(IOCNAME).sav")
+
+#################################################
+
 ## Load record instances
-dbLoadTemplate "db/userHost.substitutions"
-dbLoadRecords "db/dbSubExample.db", "user=mkpHost"
-
-## Set this to see messages from mySub
-#var mySubDebug 1
-
-## Run this to trace the stages of iocInit
-#traceIocInit
+dbLoadRecords "db/example.db"
 
 cd ${TOP}/iocBoot/${IOC}
 iocInit
 
-## Start any sequence programs
-#seq sncExample, "user=mkpHost"
+# Create request file and start periodic 'save'
+epicsThreadSleep(5)
+makeAutosaveFileFromDbInfo("$(SAVE_DIR)/$(IOCNAME).req", "autosaveFields")
+create_monitor_set("$(IOCNAME).req", 10)
+
+

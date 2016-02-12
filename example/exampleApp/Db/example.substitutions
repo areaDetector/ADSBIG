@@ -2,7 +2,7 @@
 file ADSBIG.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT}
-	{BL99:Det:, SBIG, S1, 0, 5} 
+	{BL99:Det:, SBIG:, S1, 0, 5} 
 }
 
 file save_restoreStatus.db
