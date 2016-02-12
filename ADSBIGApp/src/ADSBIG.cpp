@@ -85,6 +85,15 @@ ADSBIG::~ADSBIG()
 }
 
 /**
+ *
+ */
+void ADSBIG::report(FILE *fp, int details)
+{
+  printf("TODO\n");
+}
+
+
+/**
  * writeInt32. Write asyn integer values.
  */
 asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
