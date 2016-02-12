@@ -21,6 +21,15 @@
 
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
+ASYN=/home/controls/epics/asyn/master
+ADCORE=/home/controls/epics/ADCore/master
+ADSBIG=/home/controls/epics/ADSBIG/master
+CALC=/home/controls/epics/calc/master
+BUSY=/home/controls/epics/busy/master
+SSCAN=/home/controls/epics/sscan/master
+AUTOSAVE=/home/controls/epics/autosave/master
+DEVIOCSTATS=/home/controls/epics/devIocStats/master
+
 # EPICS_BASE usually appears last so other apps can override stuff:
 EPICS_BASE=/home/controls/epics/base/master
 

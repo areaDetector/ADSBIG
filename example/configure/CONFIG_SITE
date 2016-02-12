@@ -16,6 +16,14 @@
 #   continue building even if conflicts are found.
 CHECK_RELEASE = YES
 
+HDF5         = /usr
+HDF5_LIB     = $(HDF5)/lib64
+HDF5_INCLUDE = -I$(HDF5)/include
+
+SZIP         = /home/controls/epics/extensions/master/szip-2.1
+SZIP_LIB     = $(SZIP)/lib
+SZIP_INCLUDE = -I$(SZIP)/include
+
 # Set this when you only want to compile this application
 #   for a subset of the cross-compiled target architectures
 #   that Base is built for.
