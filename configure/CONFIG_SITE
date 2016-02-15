@@ -16,6 +16,8 @@
 #   continue building even if conflicts are found.
 CHECK_RELEASE = YES
 
+LIBUSB1=/usr/include/libusb-1.0
+
 # Set this when you only want to compile this application
 #   for a subset of the cross-compiled target architectures
 #   that Base is built for.

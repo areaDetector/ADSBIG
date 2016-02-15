@@ -23,6 +23,7 @@ TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
 ASYN=/home/controls/epics/asyn/master
 ADCORE=/home/controls/epics/ADCore/master
+ADSBIG_VENDOR=$(TOP)/vendor/LinuxDevKit/x86/c/testapp
 
 # EPICS_BASE usually appears last so other apps can override stuff:
 EPICS_BASE=/home/controls/epics/base/master

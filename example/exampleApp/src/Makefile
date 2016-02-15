@@ -11,6 +11,8 @@ PROD_IOC = example
 # example.dbd will be created and installed
 DBD += example.dbd
 
+USR_LDFLAGS += -L/usr/local/lib
+
 # example.dbd will be made up from these files:
 example_DBD += base.dbd
 example_DBD += asyn.dbd
@@ -35,6 +37,7 @@ example_LIBS += autosave
 example_LIBS += devIocStats
 example_LIBS += busy
 example_LIBS += calc
+SYS_PROD_LIBS += sbigudrv
 
 # Finally link to the EPICS Base libraries
 example_LIBS += $(EPICS_BASE_IOC_LIBS)

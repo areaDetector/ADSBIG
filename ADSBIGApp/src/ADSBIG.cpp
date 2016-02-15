@@ -19,6 +19,12 @@
 #include <drvSup.h>
 #include <registryFunction.h>
 
+#include <libusb.h>
+
+#include "lpardrv.h"
+#include "csbigcam.h"
+#include "csbigimg.h"
+
 #include "ADSBIG.h"
 
 static void ADSBIGReadoutTaskC(void *drvPvt);

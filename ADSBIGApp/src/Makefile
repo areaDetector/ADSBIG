@@ -9,6 +9,10 @@ include $(TOP)/configure/CONFIG
 
 USR_CXXFLAGS += -Wunused-but-set-variable
 
+#LIBUSB1 is set in configure/CONFIG_SITE
+USR_INCLUDES += -I$(LIBUSB1)
+USR_INCLUDES += -I$(ADSBIG_VENDOR)
+
 LIBRARY_IOC += ADSBIGSupport
 
 # xxxRecord.h will be created from xxxRecord.dbd
@@ -19,9 +23,11 @@ DBD += ADSBIGSupport.dbd
 # Compile and add the code to the support library
 ADSBIGSupport_SRCS += ADSBIG.cpp
 
-# Link locally-provided code into the support library,
-# rather than directly into the IOC application.
-#ADSBIGSupport_SRCS += dbSubExample.c
+USR_OBJS += $(ADSBIG_VENDOR)/csbigcam.o
+USR_OBJS += $(ADSBIG_VENDOR)/csbigimg.o
+
+#ADSBIGSupport_SRCS += $(ADSBIG_VENDOR)/csbigcam.cpp
+#ADSBIGSupport_SRCS += $(ADSBIG_VENDOR)/csbigimg.cpp
 
 ADSBIGSupport_LIBS += $(EPICS_BASE_IOC_LIBS)
 
