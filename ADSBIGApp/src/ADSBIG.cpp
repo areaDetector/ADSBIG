@@ -26,6 +26,7 @@
 #include "ADSBIG.h"
 
 static void ADSBIGReadoutTaskC(void *drvPvt);
+static void ADSBIGPollingTaskC(void *drvPvt);
 
 /**
  * Constructor
@@ -133,13 +134,25 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 
   //Create the thread that reads the data 
   status = (epicsThreadCreate("ADSBIGReadoutTask",
-                            epicsThreadPriorityMedium,
+                            epicsThreadPriorityHigh,
                             epicsThreadGetStackSize(epicsThreadStackMedium),
                             (EPICSTHREADFUNC)ADSBIGReadoutTaskC,
                             this) == NULL);
   if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
 	      "%s epicsThreadCreate failure for ADSBIGReadoutTask.\n", functionName);
+    return;
+  }
+
+  //Create the thread that periodically reads the temperature and readout progress
+  status = (epicsThreadCreate("ADSBIGPollingTask",
+                            epicsThreadPriorityMedium,
+                            epicsThreadGetStackSize(epicsThreadStackMedium),
+                            (EPICSTHREADFUNC)ADSBIGPollingTaskC,
+                            this) == NULL);
+  if (status) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+	      "%s epicsThreadCreate failure for ADSBIGPollingTask.\n", functionName);
     return;
   }
 
@@ -349,6 +362,51 @@ void ADSBIG::readoutTask(void)
 
 }
 
+/**
+ * polling thread function
+ */
+void ADSBIG::pollingTask(void)
+{
+  epicsFloat64 timeout = 1.0;
+  double temperature = 0.0;
+  PAR_ERROR cam_err = CE_NO_ERROR;
+
+  const char* functionName = "ADSBIG::pollingTask";
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Started Polling Thread.\n", functionName);
+
+  while (1) {
+
+    epicsThreadSleep(timeout);
+
+    //Sanity checks
+    if ((p_Cam == NULL) || (p_Img == NULL)) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s NULL pointer.\n", functionName);
+      break;
+    }
+
+    lock();
+
+    if ((cam_err = p_Cam->GetCCDTemperature(temperature)) != CE_NO_ERROR) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. CSBIGCam::GetCCDTemperature returned an error. %s\n", 
+  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+    } else {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		"%s Actual Temperature: %f\n", functionName, temperature);
+      setDoubleParam(ADTemperatureActual, temperature);
+    }
+
+    callParamCallbacks();
+
+    unlock();
+
+  }
+
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+	    "%s: ERROR: Exiting ADSBIGPollingTask main loop.\n", functionName);
+
+}
+
 
 //Global C utility functions to tie in with EPICS
 static void ADSBIGReadoutTaskC(void *drvPvt)
@@ -356,6 +414,12 @@ static void ADSBIGReadoutTaskC(void *drvPvt)
   ADSBIG *pPvt = (ADSBIG *)drvPvt;
   
   pPvt->readoutTask();
+}
+static void ADSBIGPollingTaskC(void *drvPvt)
+{
+  ADSBIG *pPvt = (ADSBIG *)drvPvt;
+  
+  pPvt->pollingTask();
 }
 
 

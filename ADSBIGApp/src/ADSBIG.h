@@ -42,7 +42,8 @@ class ADSBIG : public ADDriver {
 
   virtual void report(FILE *fp, int details);
 
-  void readoutTask(void); 
+  void readoutTask(void);
+  void pollingTask(void);
 
  private:
   
