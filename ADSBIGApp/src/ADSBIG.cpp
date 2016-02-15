@@ -194,6 +194,7 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   if (function == ADAcquire) {
     if ((value==1) && (adStatus == ADStatusIdle)) {
       m_Acquiring = 1;
+      setIntegerParam(ADStatus, ADStatusAcquire);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Start Event.\n", functionName);
       printf("Sending start event\n");
       epicsEventSignal(this->m_startEvent);
@@ -344,7 +345,8 @@ void ADSBIG::readoutTask(void)
       printf("%s Time after acqusition: ", functionName);
       epicsTime::getCurrent().show(0);
 
-      //Complete Start callback
+      //Complete Acquire callback
+      setIntegerParam(ADStatus, ADStatusIdle);
       callParamCallbacks();
       setIntegerParam(ADAcquire, 0);
       callParamCallbacks();
@@ -386,14 +388,29 @@ void ADSBIG::pollingTask(void)
 
     lock();
 
-    if ((cam_err = p_Cam->GetCCDTemperature(temperature)) != CE_NO_ERROR) {
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. CSBIGCam::GetCCDTemperature returned an error. %s\n", 
-  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
-    } else {
+    GRAB_STATE camState = GS_IDLE;
+    double camPercentComplete = 0.0;
+    int adStatus = 0;
+    getIntegerParam(ADStatus, &adStatus);
+    if (adStatus == ADStatusAcquire) {
+      p_Cam->GetGrabState(camState, camPercentComplete);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"%s Actual Temperature: %f\n", functionName, temperature);
-      setDoubleParam(ADTemperatureActual, temperature);
+		"%s Cam State: %d. Percent Complete: %f\n", 
+		functionName, camState, (camPercentComplete*100.0));
+      printf("Cam State: %d, Percent Complete: %f\n", camState, (camPercentComplete*100.0));
+      if ((camState == GS_DIGITIZING_DARK) || (camState == GS_DIGITIZING_LIGHT)) {
+	setIntegerParam(ADStatus, ADStatusReadout);
+      }
+    } else {
+      if ((cam_err = p_Cam->GetCCDTemperature(temperature)) != CE_NO_ERROR) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		  "%s. CSBIGCam::GetCCDTemperature returned an error. %s\n", 
+		  functionName, p_Cam->GetErrorString(cam_err).c_str());
+    } else {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		  "%s Actual Temperature: %f\n", functionName, temperature);
+	setDoubleParam(ADTemperatureActual, temperature);
+      }
     }
 
     callParamCallbacks();
