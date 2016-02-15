@@ -252,11 +252,11 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   getIntegerParam(ADStatus, &adStatus);
 
   if (function == ADAcquireTime) {
-    p_Cam->SetExposureTime(value);
+    if (value > 0) {
+      p_Cam->SetExposureTime(value);
+    }
   }
   
-
-
   if (status != asynSuccess) {
     callParamCallbacks(addr);
     return asynError;
