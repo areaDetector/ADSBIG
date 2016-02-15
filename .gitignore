@@ -36,4 +36,5 @@ extensions/src/cothread/dist/
 
 #Built files in vendor directory
 *.o
+vendor/LinuxDevKit/x86/c/testapp/testapp
 
