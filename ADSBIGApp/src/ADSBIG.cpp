@@ -43,6 +43,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   const char *functionName = "ADSBIG::ADSBIG";
 
   m_Acquiring = 0;
+  m_CamWidth = 0;
+  m_CamHeight = 0;
 
   //Create the epicsEvent for signaling the data task.
   //This will cause it to do a poll immediately, rather than wait for the poll time period.
@@ -74,18 +76,52 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   }
   if ((cam_err = p_Cam->GetError()) != CE_NO_ERROR) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		"%s. CSBIGCam constructor failed. %s\n", functionName, p_Cam->GetErrorString(cam_err).c_str());
+		"%s. CSBIGCam constructor failed. %s\n", 
+	      functionName, p_Cam->GetErrorString(cam_err).c_str());
     return;
   }
 
   if ((cam_err = p_Cam->EstablishLink()) != CE_NO_ERROR) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		"%s. Failed to establish link to camera. %s\n", functionName, p_Cam->GetErrorString(cam_err).c_str());
+		"%s. Failed to establish link to camera. %s\n", 
+	      functionName, p_Cam->GetErrorString(cam_err).c_str());
     return;
   }
 
-  printf("%s Successfully connected to camera: %s\n", functionName, p_Cam->GetCameraTypeString().c_str());
+  printf("%s Successfully connected to camera: %s\n", 
+	 functionName, p_Cam->GetCameraTypeString().c_str());
 
+  //Set some default camera modes
+  p_Cam->SetActiveCCD(CCD_IMAGING);
+  p_Cam->SetReadoutMode(RM_1X1);
+  //A lot of defaults are set in the CSBIGCam::Init function as well.
+  //FastReadout only seems to apply to the STF-8300.
+  p_Cam->SetABGState(ABG_LOW7);
+  p_Cam->SetFastReadout(false); 
+  p_Cam->SetDualChannelMode(false);
+
+  if ((cam_err = p_Cam->GetFullFrame(m_CamWidth, m_CamHeight)) !=  CE_NO_ERROR) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. Failed to read camera dimensions. %s\n", 
+  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+    return;
+  } else {
+    printf("%s Camera Width: %d\n", functionName, m_CamWidth);
+    printf("%s Camera Height: %d\n", functionName, m_CamHeight);
+  }
+
+  p_Cam->SetSubFrame(0, 0, m_CamWidth, m_CamHeight);
+
+  //Create image object
+  p_Img = new CSBIGImg();
+  if (p_Img->AllocateImageBuffer(m_CamWidth, m_CamHeight) != TRUE) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. Failed to allocate image buffer for maximum image size.\n", 
+  	      functionName);
+    return;
+  }
+  
+  
   //Create the thread that reads the data 
   status = (epicsThreadCreate("ADSBIGReadoutTask",
                             epicsThreadPriorityMedium,
