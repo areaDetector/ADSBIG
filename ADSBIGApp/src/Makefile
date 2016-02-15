@@ -23,6 +23,8 @@ DBD += ADSBIGSupport.dbd
 # Compile and add the code to the support library
 ADSBIGSupport_SRCS += ADSBIG.cpp
 
+# These are compiled as part of the top level Make,
+# before we get to compiling the support module.
 USR_OBJS += $(ADSBIG_VENDOR)/csbigcam.o
 USR_OBJS += $(ADSBIG_VENDOR)/csbigimg.o
 
