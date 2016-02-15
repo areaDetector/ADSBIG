@@ -94,6 +94,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   //Set some default camera modes
   p_Cam->SetActiveCCD(CCD_IMAGING);
   p_Cam->SetReadoutMode(RM_1X1);
+  p_Cam->SetExposureTime(1);
   //A lot of defaults are set in the CSBIGCam::Init function as well.
   //FastReadout only seems to apply to the STF-8300.
   p_Cam->SetABGState(ABG_LOW7);
