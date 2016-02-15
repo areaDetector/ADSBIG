@@ -17,3 +17,15 @@
 
 include "ADBase.template"
 
+
+# ///
+# /// Switch between light field and dark field modes
+# ///
+record(bo, "$(P)$(R)DarkField")
+{
+    field(DTYP,"asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_DARK_FIELD")
+    field(ZNAM,"Light Field")  
+    field(ONAM,"Dark Field")
+    info(autosaveFields, "VAL")
+}
