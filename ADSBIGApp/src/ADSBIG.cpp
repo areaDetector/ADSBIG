@@ -1,4 +1,3 @@
-
 /**
  * Area detector driver for SBIG Astronomical Instruments cameras.
  * 
@@ -34,11 +33,11 @@ static void ADSBIGReadoutTaskC(void *drvPvt);
  */
 ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) : 
   ADDriver(portName, 1, NUM_DRIVER_PARAMS, 
-	   maxBuffers, maxMemory, 
-	   asynInt32Mask | asynInt32ArrayMask | asynDrvUserMask,
-	   asynInt32Mask | asynFloat64Mask, 
-	   ASYN_CANBLOCK | ASYN_MULTIDEVICE,
-	   1, 0, 0)
+	     maxBuffers, maxMemory, 
+	     asynInt32Mask | asynInt32ArrayMask | asynDrvUserMask,
+	     asynInt32Mask | asynFloat64Mask, 
+	     ASYN_CANBLOCK | ASYN_MULTIDEVICE,
+	     1, 0, 0) 
 {
   int status = 0;
   const char *functionName = "ADSBIG::ADSBIG";
@@ -66,6 +65,26 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 
   //Connect to camera here and get library handle
   printf("%s Connecting to camera...\n", functionName);
+  p_Cam = new CSBIGCam(DEV_USB1);
+  PAR_ERROR cam_err = CE_NO_ERROR;
+  if (p_Cam == NULL) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		"%s. CSBIGCam constructor failed. p_Cam is NULL.\n", functionName);
+    return;
+  }
+  if ((cam_err = p_Cam->GetError()) != CE_NO_ERROR) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		"%s. CSBIGCam constructor failed. %s\n", functionName, p_Cam->GetErrorString(cam_err).c_str());
+    return;
+  }
+
+  if ((cam_err = p_Cam->EstablishLink()) != CE_NO_ERROR) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		"%s. Failed to establish link to camera. %s\n", functionName, p_Cam->GetErrorString(cam_err).c_str());
+    return;
+  }
+
+  printf("%s Successfully connected to camera: %s\n", functionName, p_Cam->GetCameraTypeString().c_str());
 
   //Create the thread that reads the data 
   status = (epicsThreadCreate("ADSBIGReadoutTask",

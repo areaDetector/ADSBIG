@@ -52,6 +52,7 @@ class ADSBIG : public ADDriver {
 
   //Private dynamic data members
   epicsUInt32 m_Acquiring;
+  CSBIGCam *p_Cam;
 
   epicsEventId m_startEvent;
   epicsEventId m_stopEvent;
