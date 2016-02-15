@@ -32,10 +32,11 @@ APP_OBJ    = $(O_APP)
 INCLUDE    = -I .ls -I /usr/include/libusb-1.0/ -I /data/fits/cfitsio
 LIBRARY    = -L /usr/local/lib -L /data/fits/cfitsio/lib/
 
-APP_CFLAGS = -O2 $(INCLUDE) $(LIBRARY) -Wall
+APP_CFLAGS = -fPIC $(INCLUDE) $(LIBRARY) -Wall
 APP_CC     = g++
 ####################################################################################
 all: $(APP_NAME)
+install: all
 ####################################################################################
 # APP_NAME
 ####################################################################################
