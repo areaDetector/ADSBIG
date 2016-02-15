@@ -9,7 +9,6 @@
  *
  */
 
-//Epics headers
 #include <epicsTime.h>
 #include <epicsThread.h>
 #include <epicsExport.h>
@@ -45,6 +44,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   m_Acquiring = 0;
   m_CamWidth = 0;
   m_CamHeight = 0;
+  m_df = false;
 
   //Create the epicsEvent for signaling the data task.
   //This will cause it to do a poll immediately, rather than wait for the poll time period.
@@ -250,6 +250,7 @@ void ADSBIG::readoutTask(void)
   epicsFloat64 timeout = 0.001;
   bool error = false;
   bool acquire = false;
+  PAR_ERROR cam_err = CE_NO_ERROR;
 
   const char* functionName = "ADSBIG::readoutTask";
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Started Readout Thread.\n", functionName);
@@ -272,19 +273,45 @@ void ADSBIG::readoutTask(void)
 
     eventStatus = epicsEventWait(m_startEvent);          
     if (eventStatus == epicsEventWaitOK) {
-      printf("Got start event.\n");
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Got Start Event.\n", functionName);
       acquire = true;
       error = false;
       lock();
 
-      
+      //Sanity checks
+      if ((p_Cam == NULL) || (p_Img == NULL)) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s NULL pointer.\n", functionName);
+	break;
+      }
+
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		"%s Time before acqusition: &s\n", functionName, epicsTime::getCurrent().show(0));
+
+      //Read what type of image we want - light field or dark field?
+
+      //Do exposure
+      if (m_df) {
+	cam_err = p_Cam->GrabImage(p_Img, SBDF_DARK_ONLY);
+      } else {
+	cam_err = p_Cam->GrabImage(p_Img, SBDF_LIGHT_ONLY);
+      }
+      if (cam_err != CE_NO_ERROR) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. CSBIGCam::GrabImage returned an error. %s\n", 
+  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+      }
+
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		"%s Time after acqusition: &s\n", functionName, epicsTime::getCurrent().show(0));
 
       //Complete Start callback
       callParamCallbacks();
       setIntegerParam(ADSBIGStartParam, 0);
       callParamCallbacks();
       unlock();
+
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		"%s Completed acqusition.\n", functionName);
 
     } //end of start event
 

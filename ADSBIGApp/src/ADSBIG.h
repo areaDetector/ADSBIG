@@ -56,6 +56,7 @@ class ADSBIG : public ADDriver {
   CSBIGImg *p_Img;
   int m_CamWidth;
   int m_CamHeight;
+  bool m_df;
   
   epicsEventId m_startEvent;
   epicsEventId m_stopEvent;
