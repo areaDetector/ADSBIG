@@ -311,6 +311,7 @@ void ADSBIG::readoutTask(void)
       getIntegerParam(ADSBIGDarkFieldParam, &darkField);
 
       //Do exposure
+      unlock();
       if (darkField > 0) {
 	printf("Dark Field...\n");
 	cam_err = p_Cam->GrabImage(p_Img, SBDF_DARK_ONLY);
@@ -318,6 +319,7 @@ void ADSBIG::readoutTask(void)
 	printf("Light Field...\n");
 	cam_err = p_Cam->GrabImage(p_Img, SBDF_LIGHT_ONLY);
       }
+      lock();
       if (cam_err != CE_NO_ERROR) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
   		"%s. CSBIGCam::GrabImage returned an error. %s\n", 
