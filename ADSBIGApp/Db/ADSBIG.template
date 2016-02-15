@@ -17,7 +17,6 @@
 
 include "ADBase.template"
 
-
 # ///
 # /// Switch between light field and dark field modes
 # ///
@@ -29,3 +28,18 @@ record(bo, "$(P)$(R)DarkField")
     field(ONAM,"Dark Field")
     info(autosaveFields, "VAL")
 }
+
+# ///
+# /// Read back the calculated acquisition percent complete (exposure + readout).
+# /// This is read from the SBIG class library when we are acquiring.
+# ///
+record(ai, "$(P)$(R)PercentComplete_RBV")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_PERCENT_COMPLETE")
+   field(PREC, "1")
+   field(SCAN, "I/O Intr")
+}
+
+
+

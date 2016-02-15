@@ -63,6 +63,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   //createParam adds the parameters to all param lists automatically (using maxAddr).
   createParam(ADSBIGFirstParamString,     asynParamInt32,    &ADSBIGFirstParam);
   createParam(ADSBIGDarkFieldParamString, asynParamInt32,    &ADSBIGDarkFieldParam);
+  createParam(ADSBIGPercentCompleteParamString, asynParamFloat64,  &ADSBIGPercentCompleteParam);
   createParam(ADSBIGLastParamString,      asynParamInt32,    &ADSBIGLastParam);
 
   //Connect to camera here and get library handle
@@ -125,6 +126,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   bool paramStatus = true;
   //Initialise any paramLib parameters that need passing up to device support
   paramStatus = ((setIntegerParam(ADSBIGDarkFieldParam, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSBIGPercentCompleteParam, 0.0) == asynSuccess) && paramStatus);
 
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
@@ -392,7 +394,7 @@ void ADSBIG::pollingTask(void)
     double camPercentComplete = 0.0;
     int adStatus = 0;
     getIntegerParam(ADStatus, &adStatus);
-    if (adStatus == ADStatusAcquire) {
+    if ((adStatus == ADStatusAcquire || adStatus == ADStatusReadout)) {
       p_Cam->GetGrabState(camState, camPercentComplete);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
 		"%s Cam State: %d. Percent Complete: %f\n", 
@@ -401,6 +403,7 @@ void ADSBIG::pollingTask(void)
       if ((camState == GS_DIGITIZING_DARK) || (camState == GS_DIGITIZING_LIGHT)) {
 	setIntegerParam(ADStatus, ADStatusReadout);
       }
+      setDoubleParam(ADSBIGPercentCompleteParam, (camPercentComplete*100.0));
     } else {
       if ((cam_err = p_Cam->GetCCDTemperature(temperature)) != CE_NO_ERROR) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 

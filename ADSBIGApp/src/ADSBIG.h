@@ -29,6 +29,7 @@
 
 #define ADSBIGFirstParamString              "ADSBIG_FIRST"
 #define ADSBIGDarkFieldParamString          "ADSBIG_DARK_FIELD"
+#define ADSBIGPercentCompleteParamString    "ADSBIG_PERCENT_COMPLETE"
 #define ADSBIGLastParamString               "ADSBIG_LAST"
 
 class ADSBIG : public ADDriver {
@@ -65,6 +66,7 @@ class ADSBIG : public ADDriver {
   int ADSBIGFirstParam;
   #define ADSBIG_FIRST_PARAM ADSBIGFirstParam
   int ADSBIGDarkFieldParam;
+  int ADSBIGPercentCompleteParam;
   int ADSBIGLastParam;
   #define ADSBIG_LAST_PARAM ADSBIGLastParam
   
