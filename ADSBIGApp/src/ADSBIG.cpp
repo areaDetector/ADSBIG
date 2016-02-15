@@ -198,6 +198,8 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
   } 
 
+  
+
   if (status != asynSuccess) {
     callParamCallbacks(addr);
     return asynError;
@@ -301,7 +303,7 @@ void ADSBIG::readoutTask(void)
 	break;
       }
 
-      printf("%s Time after acqusition: ", functionName);
+      printf("%s Time before acqusition: ", functionName);
       epicsTime::getCurrent().show(0);
 
       //Read what type of image we want - light field or dark field?
@@ -310,10 +312,10 @@ void ADSBIG::readoutTask(void)
 
       //Do exposure
       if (darkField > 0) {
-	printf("Dark Field...");
+	printf("Dark Field...\n");
 	cam_err = p_Cam->GrabImage(p_Img, SBDF_DARK_ONLY);
       } else {
-	printf("Light Field...");
+	printf("Light Field...\n");
 	cam_err = p_Cam->GrabImage(p_Img, SBDF_LIGHT_ONLY);
       }
       if (cam_err != CE_NO_ERROR) {
@@ -321,6 +323,8 @@ void ADSBIG::readoutTask(void)
   		"%s. CSBIGCam::GrabImage returned an error. %s\n", 
   	      functionName, p_Cam->GetErrorString(cam_err).c_str());
       }
+
+      unsigned short *pData = p_Img->GetImagePointer();
 
       printf("%s Time after acqusition: ", functionName);
       epicsTime::getCurrent().show(0);
