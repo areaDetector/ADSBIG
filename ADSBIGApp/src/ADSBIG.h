@@ -28,7 +28,7 @@
 #include "ADDriver.h"
 
 #define ADSBIGFirstParamString              "ADSBIG_FIRST"
-#define ADSBIGStartParamString               "ADSBIG_START"
+#define ADSBIGDarkFieldParamString          "ADSBIG_DARK_FIELD"
 #define ADSBIGLastParamString               "ADSBIG_LAST"
 
 class ADSBIG : public ADDriver {
@@ -56,7 +56,6 @@ class ADSBIG : public ADDriver {
   CSBIGImg *p_Img;
   int m_CamWidth;
   int m_CamHeight;
-  bool m_df;
   
   epicsEventId m_startEvent;
   epicsEventId m_stopEvent;
@@ -64,7 +63,7 @@ class ADSBIG : public ADDriver {
   //Parameter library indices
   int ADSBIGFirstParam;
   #define ADSBIG_FIRST_PARAM ADSBIGFirstParam
-  int ADSBIGStartParam;
+  int ADSBIGDarkFieldParam;
   int ADSBIGLastParam;
   #define ADSBIG_LAST_PARAM ADSBIGLastParam
   

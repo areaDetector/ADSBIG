@@ -44,7 +44,6 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   m_Acquiring = 0;
   m_CamWidth = 0;
   m_CamHeight = 0;
-  m_df = false;
 
   //Create the epicsEvent for signaling the data task.
   //This will cause it to do a poll immediately, rather than wait for the poll time period.
@@ -62,8 +61,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   //Add the params to the paramLib 
   //createParam adds the parameters to all param lists automatically (using maxAddr).
   createParam(ADSBIGFirstParamString,     asynParamInt32,    &ADSBIGFirstParam);
-  createParam(ADSBIGStartParamString,     asynParamInt32,    &ADSBIGStartParam);
-  createParam(ADSBIGLastParamString,     asynParamInt32,    &ADSBIGLastParam);
+  createParam(ADSBIGDarkFieldParamString, asynParamInt32,    &ADSBIGDarkFieldParam);
+  createParam(ADSBIGLastParamString,      asynParamInt32,    &ADSBIGLastParam);
 
   //Connect to camera here and get library handle
   printf("%s Connecting to camera...\n", functionName);
@@ -121,8 +120,17 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   	      functionName);
     return;
   }
-  
-  
+
+  bool paramStatus = true;
+  //Initialise any paramLib parameters that need passing up to device support
+  paramStatus = ((setIntegerParam(ADSBIGDarkFieldParam, 0) == asynSuccess) && paramStatus);
+
+  if (!paramStatus) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+	      "%s Unable To Set Driver Parameters In Constructor.\n", functionName);
+    return;
+  }
+
   //Create the thread that reads the data 
   status = (epicsThreadCreate("ADSBIGReadoutTask",
                             epicsThreadPriorityMedium,
@@ -180,7 +188,15 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if ((value==0) && (adStatus != ADStatusIdle)) {
       printf("Aborting acqusition.\n");
     }
-  }
+  } else if (function == ADSBIGDarkFieldParam) {
+    if (value == 1) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		"%s Setting Dark Field Mode.\n", functionName);
+    } else {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		"%s Setting Light Field Mode.\n", functionName);
+    }
+  } 
 
   if (status != asynSuccess) {
     callParamCallbacks(addr);
@@ -285,15 +301,19 @@ void ADSBIG::readoutTask(void)
 	break;
       }
 
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"%s Time before acqusition: &s\n", functionName, epicsTime::getCurrent().show(0));
+      printf("%s Time after acqusition: ", functionName);
+      epicsTime::getCurrent().show(0);
 
       //Read what type of image we want - light field or dark field?
+      int darkField = 0;
+      getIntegerParam(ADSBIGDarkFieldParam, &darkField);
 
       //Do exposure
-      if (m_df) {
+      if (darkField > 0) {
+	printf("Dark Field...");
 	cam_err = p_Cam->GrabImage(p_Img, SBDF_DARK_ONLY);
       } else {
+	printf("Light Field...");
 	cam_err = p_Cam->GrabImage(p_Img, SBDF_LIGHT_ONLY);
       }
       if (cam_err != CE_NO_ERROR) {
@@ -302,12 +322,12 @@ void ADSBIG::readoutTask(void)
   	      functionName, p_Cam->GetErrorString(cam_err).c_str());
       }
 
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"%s Time after acqusition: &s\n", functionName, epicsTime::getCurrent().show(0));
+      printf("%s Time after acqusition: ", functionName);
+      epicsTime::getCurrent().show(0);
 
       //Complete Start callback
       callParamCallbacks();
-      setIntegerParam(ADSBIGStartParam, 0);
+      setIntegerParam(ADAcquire, 0);
       callParamCallbacks();
       unlock();
 
