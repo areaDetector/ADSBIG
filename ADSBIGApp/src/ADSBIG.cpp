@@ -187,6 +187,8 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int function = pasynUser->reason;
   int addr = 0;
   int adStatus = 0;
+  PAR_ERROR cam_err = CE_NO_ERROR;
+  EndExposureParams eep;
   const char *functionName = "ADSBIG::writeInt32";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Entry.\n", functionName);
@@ -203,6 +205,13 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
     if ((value==0) && (adStatus != ADStatusIdle)) {
       printf("Aborting acqusition.\n");
+      cam_err = p_Cam->EndExposure();
+      //SBIGUnivDrvCommand(CC_END_EXPOSURE, &eep, NULL);
+      if (cam_err != CE_NO_ERROR) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. CSBIGCam::EndExposure returned an error. %s\n", 
+  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+      }
     }
   } else if (function == ADSBIGDarkFieldParam) {
     if (value == 1) {
@@ -328,19 +337,26 @@ void ADSBIG::readoutTask(void)
       int darkField = 0;
       getIntegerParam(ADSBIGDarkFieldParam, &darkField);
 
+      cam_err = p_Cam->GrabSetup(p_Img, SBDF_DARK_ONLY);
+      if (cam_err != CE_NO_ERROR) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. CSBIGCam::GrabSetup returned an error. %s\n", 
+  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+      }
+
       //Do exposure
       unlock();
       if (darkField > 0) {
 	printf("Dark Field...\n");
-	cam_err = p_Cam->GrabImage(p_Img, SBDF_DARK_ONLY);
+	cam_err = p_Cam->GrabMain(p_Img, SBDF_DARK_ONLY);
       } else {
 	printf("Light Field...\n");
-	cam_err = p_Cam->GrabImage(p_Img, SBDF_LIGHT_ONLY);
+	cam_err = p_Cam->GrabMain(p_Img, SBDF_LIGHT_ONLY);
       }
       lock();
       if (cam_err != CE_NO_ERROR) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. CSBIGCam::GrabImage returned an error. %s\n", 
+  		"%s. CSBIGCam::GrabMain returned an error. %s\n", 
   	      functionName, p_Cam->GetErrorString(cam_err).c_str());
       }
 
