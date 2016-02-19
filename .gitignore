@@ -34,6 +34,8 @@ extensions/src/cothread/cothread/_coroutine.so
 extensions/src/cothread/cothread/libca_path.py
 extensions/src/cothread/dist/
 
+core*
+
 #Built files in vendor directory
 *.o
 vendor/LinuxDevKit/x86/c/testapp/testapp
