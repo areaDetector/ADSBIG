@@ -139,7 +139,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   paramStatus = ((setIntegerParam(ADMinY, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADImageMode, ADImageSingle) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADTriggerMode, ADTriggerInternal) == asynSuccess) && paramStatus); 
-  paramStatus = ((setIntegerParam(ADAcquireTime, 1) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADAcquireTime, 1.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(NDDataType, NDUInt16) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSBIGDarkFieldParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSBIGPercentCompleteParam, 0.0) == asynSuccess) && paramStatus);
 
@@ -203,7 +204,6 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int addr = 0;
   int adStatus = 0;
   PAR_ERROR cam_err = CE_NO_ERROR;
-  EndExposureParams eep;
   const char *functionName = "ADSBIG::writeInt32";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Entry.\n", functionName);
@@ -306,11 +306,18 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
  */
 void ADSBIG::readoutTask(void)
 {
-  asynStatus status = asynError;
   epicsEventWaitStatus eventStatus;
   epicsFloat64 timeout = 0.001;
   bool error = false;
-  bool acquire = false;
+  int arrayCounter = 0;
+  size_t dims[2];
+  int nDims = 2;
+  epicsInt32 sizeX = 0;
+  epicsInt32 sizeY = 0;
+  NDDataType_t dataType;
+  epicsInt32 iDataType = 0;
+  epicsTimeStamp nowTime;
+  NDArray *pArray = NULL;
   PAR_ERROR cam_err = CE_NO_ERROR;
 
   const char* functionName = "ADSBIG::readoutTask";
@@ -335,9 +342,12 @@ void ADSBIG::readoutTask(void)
     eventStatus = epicsEventWait(m_startEvent);          
     if (eventStatus == epicsEventWaitOK) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Got Start Event.\n", functionName);
-      acquire = true;
       error = false;
+      arrayCounter = 0;
       lock();
+      setIntegerParam(NDArrayCounter, arrayCounter);
+      setIntegerParam(ADNumImagesCounter, 0);
+      setIntegerParam(ADNumExposuresCounter, 0);
 
       //Sanity checks
       if ((p_Cam == NULL) || (p_Img == NULL)) {
@@ -360,6 +370,7 @@ void ADSBIG::readoutTask(void)
       }
 
       //Do exposure
+      callParamCallbacks();
       unlock();
       if (darkField > 0) {
 	printf("Dark Field...\n");
@@ -381,6 +392,51 @@ void ADSBIG::readoutTask(void)
       epicsTime::getCurrent().show(0);
 
       setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
+
+      //NDArray callbacks
+      int arrayCallbacks = 0;
+      getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
+      getIntegerParam(ADSizeX, &sizeX);
+      getIntegerParam(ADSizeY, &sizeY);
+      getIntegerParam(NDDataType, &iDataType);
+      dataType = static_cast<NDDataType_t>(iDataType);
+      if (dataType == NDUInt8) {
+	setIntegerParam(NDArraySize, sizeX*sizeY*sizeof(epicsUInt8));
+      } else if (dataType == NDUInt16) {
+	setIntegerParam(NDArraySize, sizeX*sizeY*sizeof(epicsUInt16));
+      } else if (dataType == NDUInt32) {
+	setIntegerParam(NDArraySize, sizeX*sizeY*sizeof(epicsUInt32));
+      } else {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. ERROR: We can't handle this data type. dataType: %d\n", 
+		  functionName, dataType);
+      }
+      
+      if (arrayCallbacks) {
+	++arrayCounter;
+	//Allocate an NDArray
+        dims[0] = sizeX;
+        dims[1] = sizeY;
+        if ((pArray = this->pNDArrayPool->alloc(nDims, dims, dataType, 0, NULL)) == NULL) {
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+  		"%s. ERROR: pArray is NULL.\n", 
+  	      functionName);
+	} else {
+	  epicsTimeGetCurrent(&nowTime);
+	  pArray->uniqueId = arrayCounter;
+	  pArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
+	  updateTimeStamp(&pArray->epicsTS);
+	  /* Get any attributes that have been defined for this driver */        
+          this->getAttributes(pArray->pAttributeList);
+	  pArray->pData = pData;
+	  unlock();
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s: Calling NDArray callback\n", functionName);
+	  doCallbacksGenericPointer(pArray, NDArrayData, 0);
+	  lock();
+	  pArray->release();
+	}
+	
+      }
 
       //Complete Acquire callback
       setIntegerParam(ADStatus, ADStatusIdle);
