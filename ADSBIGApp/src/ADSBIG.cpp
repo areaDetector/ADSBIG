@@ -203,7 +203,7 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int function = pasynUser->reason;
   int addr = 0;
   int adStatus = 0;
-  PAR_ERROR cam_err = CE_NO_ERROR;
+  //PAR_ERROR cam_err = CE_NO_ERROR;
   const char *functionName = "ADSBIG::writeInt32";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Entry.\n", functionName);
@@ -219,14 +219,14 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
       epicsEventSignal(this->m_startEvent);
     }
     if ((value==0) && (adStatus != ADStatusIdle)) {
-      printf("Aborting acqusition.\n");
-      cam_err = p_Cam->EndExposure();
+      printf("Aborting acqusition. NOTE: I couldn't get this working.\n");
+      //cam_err = p_Cam->EndExposure();
       //SBIGUnivDrvCommand(CC_END_EXPOSURE, &eep, NULL);
-      if (cam_err != CE_NO_ERROR) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. CSBIGCam::EndExposure returned an error. %s\n", 
-  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
-      }
+      //if (cam_err != CE_NO_ERROR) {
+      //	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+      //	"%s. CSBIGCam::EndExposure returned an error. %s\n", 
+      //      functionName, p_Cam->GetErrorString(cam_err).c_str());
+      //}
     }
   } else if (function == ADSBIGDarkFieldParam) {
     if (value == 1) {
