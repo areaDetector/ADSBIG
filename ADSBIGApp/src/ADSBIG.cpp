@@ -114,6 +114,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 
   p_Cam->SetSubFrame(0, 0, m_CamWidth, m_CamHeight);
 
+  
+
   //Create image object
   p_Img = new CSBIGImg();
   if (p_Img->AllocateImageBuffer(m_CamWidth, m_CamHeight) != TRUE) {
@@ -125,6 +127,19 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 
   bool paramStatus = true;
   //Initialise any paramLib parameters that need passing up to device support
+  paramStatus = ((setStringParam(ADManufacturer, "SBIG") == asynSuccess) && paramStatus);
+  paramStatus = ((setStringParam(ADModel, p_Cam->GetCameraTypeString().c_str()) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADMaxSizeX, m_CamWidth) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADMaxSizeY, m_CamHeight) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSizeX, m_CamWidth) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSizeY, m_CamHeight) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADBinX, 1) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADBinY, 1) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADMinX, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADMinY, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADImageMode, ADImageSingle) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADTriggerMode, ADTriggerInternal) == asynSuccess) && paramStatus); 
+  paramStatus = ((setIntegerParam(ADAcquireTime, 1) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSBIGDarkFieldParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSBIGPercentCompleteParam, 0.0) == asynSuccess) && paramStatus);
 
@@ -364,6 +379,8 @@ void ADSBIG::readoutTask(void)
 
       printf("%s Time after acqusition: ", functionName);
       epicsTime::getCurrent().show(0);
+
+      setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
 
       //Complete Acquire callback
       setIntegerParam(ADStatus, ADStatusIdle);
