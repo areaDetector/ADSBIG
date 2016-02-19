@@ -63,6 +63,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   //createParam adds the parameters to all param lists automatically (using maxAddr).
   createParam(ADSBIGFirstParamString,     asynParamInt32,    &ADSBIGFirstParam);
   createParam(ADSBIGDarkFieldParamString, asynParamInt32,    &ADSBIGDarkFieldParam);
+  createParam(ADSBIGReadoutModeParamString, asynParamInt32,    &ADSBIGReadoutModeParam);
   createParam(ADSBIGPercentCompleteParamString, asynParamFloat64,  &ADSBIGPercentCompleteParam);
   createParam(ADSBIGLastParamString,      asynParamInt32,    &ADSBIGLastParam);
 
@@ -203,6 +204,8 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int function = pasynUser->reason;
   int addr = 0;
   int adStatus = 0;
+  unsigned short binX = 0;
+  unsigned short binY = 0;
   //PAR_ERROR cam_err = CE_NO_ERROR;
   const char *functionName = "ADSBIG::writeInt32";
   
@@ -236,9 +239,9 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
 		"%s Setting Light Field Mode.\n", functionName);
     }
-  } 
-
-  
+  } else if (function == ADSBIGReadoutModeParam) {
+      p_Cam->SetReadoutMode(value);
+  }
 
   if (status != asynSuccess) {
     callParamCallbacks(addr);
@@ -362,12 +365,28 @@ void ADSBIG::readoutTask(void)
       int darkField = 0;
       getIntegerParam(ADSBIGDarkFieldParam, &darkField);
 
+      StartExposureParams2 sep;
+      sep.readoutMode = 1;
+      
+      printf("  Readout Mode: %d\n", p_Img->GetReadoutMode());
+
       cam_err = p_Cam->GrabSetup(p_Img, SBDF_DARK_ONLY);
       if (cam_err != CE_NO_ERROR) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
   		"%s. CSBIGCam::GrabSetup returned an error. %s\n", 
   	      functionName, p_Cam->GetErrorString(cam_err).c_str());
       }
+
+      unsigned short binX=0;
+      unsigned short binY=0;
+      p_Img->GetBinning(binX, binY);
+      printf(" binX: %d\n", binX);
+      printf(" binY: %d\n", binY);
+      printf(" PixelHeight: %f\n", p_Img->GetPixelHeight());
+      printf(" PixelWidth: %f\n", p_Img->GetPixelWidth());
+      printf(" Height: %d\n", p_Img->GetHeight());
+      printf(" Width: %d\n", p_Img->GetWidth());
+      printf(" Readout Mode: %d\n", p_Cam->GetReadoutMode());
 
       //Do exposure
       callParamCallbacks();
@@ -429,6 +448,15 @@ void ADSBIG::readoutTask(void)
 	  /* Get any attributes that have been defined for this driver */        
           this->getAttributes(pArray->pAttributeList);
 	  pArray->pData = pData;
+	  
+	  printf("  Printing image data: \n");
+                  if (pData != NULL) {
+                    for (int i = 0; i<10000; i++) {
+                      printf("   pData[%d]: %d\n", i, pData[i]);
+                    }
+                  } 
+
+
 	  unlock();
 	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s: Calling NDArray callback\n", functionName);
 	  doCallbacksGenericPointer(pArray, NDArrayData, 0);
