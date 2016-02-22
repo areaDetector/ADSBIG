@@ -22,6 +22,7 @@ example_DBD += ADSBIGSupport.dbd
 example_DBD += asSupport.dbd
 example_DBD += devIocStats.dbd
 example_DBD += busySupport.dbd
+example_DBD += sseqRecord.dbd
 
 # example_registerRecordDeviceDriver.cpp derives from example.dbd
 example_SRCS += example_registerRecordDeviceDriver.cpp
