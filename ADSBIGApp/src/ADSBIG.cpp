@@ -451,7 +451,7 @@ void ADSBIG::readoutTask(void)
 	  
 	  printf("  Printing image data: \n");
                   if (pData != NULL) {
-                    for (int i = 0; i<10000; i++) {
+                    for (int i = 0; i<10; i++) {
                       printf("   pData[%d]: %d\n", i, pData[i]);
                     }
                   } 
