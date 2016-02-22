@@ -8,19 +8,25 @@ pattern {P, R, PORT, ADDR, TIMEOUT}
 file NDStdArrays.template
 {
 pattern {P, R, PORT, TIMEOUT, ADDR, TYPE, FTVL, NELEMENTS, NDARRAY_PORT, NDARRAY_ADDR}
-        {BL99:Det, :Array1:, S1.ARR1, 1, 0, Int16, USHORT, 8487264, S1, 0}
+        {BL99:Det, :SBIG:Array1:, S1.ARR1, 1, 0, Int16, USHORT, 8487264, S1, 0}
 }
 
 file NDStats.template
 {
 pattern {P, R, PORT, TIMEOUT, ADDR, XSIZE, YSIZE, HIST_SIZE, NCHANS, NDARRAY_PORT, NDARRAY_ADDR}
-        {BL99:Det, :Stats1:, S1.STATS1, 1, 0, 3352, 2532, 256, 1000, S1, 0}
+        {BL99:Det, :SBIG:Stats1:, S1.STATS1, 1, 0, 3352, 2532, 256, 1000, S1, 0}
 }
 
 file NDFileTIFF.template
 {
 pattern {P, R, PORT, TIMEOUT, ADDR, NDARRAY_PORT, NDARRAY_ADDR}
-        {BL99:Det, :TIFF1:, S1.TIFF1, 1, 0, S1, 0}
+        {BL99:Det, :SBIG:TIFF1:, S1.TIFF1, 1, 0, S1, 0}
+}
+
+file sbig_aux.template
+{
+pattern {S}
+	{BL99:Det:SBIG}
 }
 
 file save_restoreStatus.db

@@ -1,0 +1,31 @@
+
+#######################################################
+#
+# Auxilary records for the SBIG camera application
+#
+#######################################################
+
+# ///
+# /// Read the max pixel value from the statistics plugin.
+# /// Trigger alarm once a limit is reached.
+# ///
+record(longin, "$(S):MaxPixelValue") {
+   field(DESC, "Max Pixel")
+   field(INP, "$(STAT)MaxValue_RBV CP MS")
+   field(FLNK, "$(S):MaxPixelCalc")
+}
+# /// The limit is adjusted if we are in integration mode.
+record(calcout, "$(S):MaxPixelCalc") {
+   field(INPA, "65535")
+   field(INPB, "$(S):MaxPixelValue NPP MS")
+   field(CALC, "(B>A)?1:0")
+   field(OUT, "$(S):MaxPixelState PP MS")
+}
+record(bi, "$(S):MaxPixelState") {
+   field(DESC, "Saturation State")
+   field(ZNAM, "Not Saturated")
+   field(ONAM, "Saturated")
+   field(ZSV, "NO_ALARM")
+   field(OSV, "MAJOR")
+   info(archive, "Monitor, 00:00:01, VAL")
+}
