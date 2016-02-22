@@ -55,6 +55,7 @@ record(ai, "$(P)$(R)PercentComplete_RBV")
    field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_PERCENT_COMPLETE")
    field(PREC, "1")
    field(SCAN, "I/O Intr")
+   field(EGU, "%")
 }
 
 
