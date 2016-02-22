@@ -17,6 +17,13 @@ example_registerRecordDeviceDriver pdbbase
 ADSBIGConfig("S1",-1,-1)
 
 #################################################
+# Set up the areaDetector plugins
+
+NDStdArraysConfigure("S1.ARR1", 10, 0, "S1", 0, -1, 0, 0)
+
+NDStatsConfigure("S1.STATS1", 10, 0, "S1", 0, -1, -1, 0, 0)
+
+NDFileTIFFConfigure("S1.TIFF1", 10, 0, "S1", 0, 0, 0, 0)
 
 #################################################
 # autosave
