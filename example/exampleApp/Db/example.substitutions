@@ -25,8 +25,8 @@ pattern {P, R, PORT, TIMEOUT, ADDR, NDARRAY_PORT, NDARRAY_ADDR}
 
 file sbig_aux.template
 {
-pattern {S}
-	{BL99:Det:SBIG}
+pattern {S, STAT}
+	{BL99:Det:SBIG, BL99:Det:SBIG:Stats1:}
 }
 
 file save_restoreStatus.db
