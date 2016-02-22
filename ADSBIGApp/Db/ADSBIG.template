@@ -30,6 +30,17 @@ record(bo, "$(P)$(R)DarkField")
 }
 
 # ///
+# /// Readback for switch between light field and dark field modes
+# ///
+record(bi, "$(P)$(R)DarkField_RBV")
+{
+    field(DTYP,"asynInt32")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_DARK_FIELD")
+    field(ZNAM,"Light Field")  
+    field(ONAM,"Dark Field")
+}
+
+# ///
 # /// Readout mode
 # ///
 record(mbbo, "$(P)$(R)ReadoutMode")
