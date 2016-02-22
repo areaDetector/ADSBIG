@@ -5,10 +5,17 @@ pattern {P, R, PORT, ADDR, TIMEOUT}
 	{BL99:Det:, SBIG:, S1, 0, 5} 
 }
 
+# We use 2x2 binning in this ROI to keep the Array1 size down.
+file NDROI.template
+{
+pattern {P, R, PORT, TIMEOUT, ADDR, NDARRAY_PORT, NDARRAY_ADDR}
+	{BL99:Det, :SBIG:ROI1:, S1.ROI1, 1, 0, S1, 0} 
+}
+
 file NDStdArrays.template
 {
 pattern {P, R, PORT, TIMEOUT, ADDR, TYPE, FTVL, NELEMENTS, NDARRAY_PORT, NDARRAY_ADDR}
-        {BL99:Det, :SBIG:Array1:, S1.ARR1, 1, 0, Int16, USHORT, 8487264, S1, 0}
+        {BL99:Det, :SBIG:Array1:, S1.ARR1, 1, 0, Int16, USHORT, 2121816, S1.ROI1, 0}
 }
 
 file NDStats.template

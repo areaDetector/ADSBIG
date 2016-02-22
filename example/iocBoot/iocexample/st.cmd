@@ -19,7 +19,9 @@ ADSBIGConfig("S1",-1,-1)
 #################################################
 # Set up the areaDetector plugins
 
-NDStdArraysConfigure("S1.ARR1", 10, 0, "S1", 0, -1, 0, 0)
+NDROIConfigure("S1.ROI1", 10, 0, "S1", 0, -1, -1, 0, 0)
+
+NDStdArraysConfigure("S1.ARR1", 10, 0, "S1.ROI1", 0, -1, 0, 0)
 
 NDStatsConfigure("S1.STATS1", 10, 0, "S1", 0, -1, -1, 0, 0)
 

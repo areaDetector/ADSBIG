@@ -19,3 +19,9 @@ record(bi, "$(S):MaxPixelState") {
    field(OSV, "MAJOR")
    info(archive, "Monitor, 00:00:01, VAL")
 }
+
+record(longout, "$(S):ImageMaxOPI") {
+   field(DESC, "Intensity Widget Max")
+   field(PINI, "YES")
+   info(autosaveFields, "VAL")
+}
