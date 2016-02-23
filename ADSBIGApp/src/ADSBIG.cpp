@@ -366,12 +366,11 @@ void ADSBIG::readoutTask(void)
       int darkField = 0;
       getIntegerParam(ADSBIGDarkFieldParam, &darkField);
 
-      StartExposureParams2 sep;
-      sep.readoutMode = 1;
-      
-      printf("  Readout Mode: %d\n", p_Img->GetReadoutMode());
-
-      cam_err = p_Cam->GrabSetup(p_Img, SBDF_DARK_ONLY);
+      if (darkField > 0) {
+	cam_err = p_Cam->GrabSetup(p_Img, SBDF_DARK_ONLY);
+      } else {
+	cam_err = p_Cam->GrabSetup(p_Img, SBDF_LIGHT_ONLY);
+      }
       if (cam_err != CE_NO_ERROR) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
   		"%s. CSBIGCam::GrabSetup returned an error. %s\n", 
@@ -390,6 +389,7 @@ void ADSBIG::readoutTask(void)
       printf(" Height: %d\n", p_Img->GetHeight());
       printf(" Width: %d\n", p_Img->GetWidth());
       printf(" Readout Mode: %d\n", p_Cam->GetReadoutMode());
+      printf(" Dark Field: %d\n", darkField);
 
       if (!error) {
 
@@ -397,10 +397,8 @@ void ADSBIG::readoutTask(void)
       callParamCallbacks();
       unlock();
       if (darkField > 0) {
-	printf("Dark Field...\n");
 	cam_err = p_Cam->GrabMain(p_Img, SBDF_DARK_ONLY);
       } else {
-	printf("Light Field...\n");
 	cam_err = p_Cam->GrabMain(p_Img, SBDF_LIGHT_ONLY);
       }
       lock();
