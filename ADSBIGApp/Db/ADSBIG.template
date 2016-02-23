@@ -26,6 +26,8 @@ record(bo, "$(P)$(R)DarkField")
     field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_DARK_FIELD")
     field(ZNAM,"Light Field")  
     field(ONAM,"Dark Field")
+    field(VAL, "0")
+    field(PINI,"YES")
     info(autosaveFields, "VAL")
 }
 
@@ -38,6 +40,7 @@ record(bi, "$(P)$(R)DarkField_RBV")
     field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_DARK_FIELD")
     field(ZNAM,"Light Field")  
     field(ONAM,"Dark Field")
+    field(SCAN,"I/O Intr")
 }
 
 # ///
@@ -53,7 +56,24 @@ record(mbbo, "$(P)$(R)ReadoutMode")
     field(ONVL, "1")
     field(TWST, "3x3")
     field(TWVL, "2")
+    field(PINI,"YES")
     info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Readout mode readback
+# ///
+record(mbbi, "$(P)$(R)ReadoutMode_RBV")
+{
+    field(DTYP,"asynInt32")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_READOUT_MODE")
+    field(ZRST, "1x1")
+    field(ZRVL, "0")
+    field(ONST, "2x2")
+    field(ONVL, "1")
+    field(TWST, "3x3")
+    field(TWVL, "2")
+    field(SCAN,"I/O Intr")
 }
 
 # ///
