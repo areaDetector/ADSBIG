@@ -241,6 +241,19 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
   } else if (function == ADSBIGReadoutModeParam) {
       p_Cam->SetReadoutMode(value);
+      if (value == 0) {
+	p_Cam->SetSubFrame(0, 0, m_CamWidth, m_CamHeight);
+	setIntegerParam(ADSizeX, m_CamWidth);
+	setIntegerParam(ADSizeY, m_CamHeight);
+      } else if (value == 1) {
+	p_Cam->SetSubFrame(0, 0, m_CamWidth/2, m_CamHeight/2);
+	setIntegerParam(ADSizeX, m_CamWidth/2);
+	setIntegerParam(ADSizeY, m_CamHeight/2);
+      } else if (value = 2) {
+	p_Cam->SetSubFrame(0, 0, m_CamWidth/3, m_CamHeight/3);
+	setIntegerParam(ADSizeX, m_CamWidth/3);
+	setIntegerParam(ADSizeY, m_CamHeight/3);
+      }
   }
 
   if (status != asynSuccess) {
