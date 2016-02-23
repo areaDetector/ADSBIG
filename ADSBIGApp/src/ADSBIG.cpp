@@ -346,6 +346,7 @@ void ADSBIG::readoutTask(void)
     if (eventStatus == epicsEventWaitOK) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Got Start Event.\n", functionName);
       error = false;
+      setStringParam(ADStatusMessage, " ");
       arrayCounter = 0;
       lock();
       setIntegerParam(NDArrayCounter, arrayCounter);
@@ -375,7 +376,9 @@ void ADSBIG::readoutTask(void)
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
   		"%s. CSBIGCam::GrabSetup returned an error. %s\n", 
   	      functionName, p_Cam->GetErrorString(cam_err).c_str());
-      }
+	error = true;
+	setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
+      } 
 
       unsigned short binX=0;
       unsigned short binY=0;
@@ -387,6 +390,8 @@ void ADSBIG::readoutTask(void)
       printf(" Height: %d\n", p_Img->GetHeight());
       printf(" Width: %d\n", p_Img->GetWidth());
       printf(" Readout Mode: %d\n", p_Cam->GetReadoutMode());
+
+      if (!error) {
 
       //Do exposure
       callParamCallbacks();
@@ -403,6 +408,8 @@ void ADSBIG::readoutTask(void)
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
   		"%s. CSBIGCam::GrabMain returned an error. %s\n", 
   	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+	error = true;
+	setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
       }
 
       unsigned short *pData = p_Img->GetImagePointer();
@@ -466,8 +473,14 @@ void ADSBIG::readoutTask(void)
 	
       }
 
+      }
+
       //Complete Acquire callback
-      setIntegerParam(ADStatus, ADStatusIdle);
+      if (!error) {
+	setIntegerParam(ADStatus, ADStatusIdle);
+      } else {
+	setIntegerParam(ADStatus, ADStatusError);
+      }
       callParamCallbacks();
       setIntegerParam(ADAcquire, 0);
       callParamCallbacks();
