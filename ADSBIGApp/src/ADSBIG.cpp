@@ -142,7 +142,10 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   paramStatus = ((setDoubleParam(ADAcquireTime, 1.0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(NDDataType, NDUInt16) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSBIGDarkFieldParam, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSBIGReadoutModeParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSBIGPercentCompleteParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADTemperatureActual, 0.0) == asynSuccess) && paramStatus);
+  
 
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
