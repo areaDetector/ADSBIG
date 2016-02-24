@@ -211,7 +211,9 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int adStatus = 0;
   unsigned short binX = 0;
   unsigned short binY = 0;
-  //PAR_ERROR cam_err = CE_NO_ERROR;
+  PAR_ERROR cam_err = CE_NO_ERROR;
+  MY_LOGICAL te_status = FALSE;
+  double ccd_temp_set = 0;
   const char *functionName = "ADSBIG::writeInt32";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Entry.\n", functionName);
@@ -259,6 +261,19 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
 	setIntegerParam(ADSizeX, m_CamWidth/3);
 	setIntegerParam(ADSizeY, m_CamHeight/3);
       }
+  } else if (function == ADSBIGTEStatusParam) {
+    getDoubleParam(ADTemperature, &ccd_temp_set);
+    if (value == 1) {
+      te_status = TRUE;
+    } else {
+      te_status = FALSE;
+    }
+    if ((cam_err = p_Cam->SetTemperatureRegulation(te_status, ccd_temp_set)) != CE_NO_ERROR) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		"%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
+		functionName, p_Cam->GetErrorString(cam_err).c_str());
+      status = asynError;
+    }
   }
 
   if (status != asynSuccess) {
@@ -290,6 +305,9 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   int function = pasynUser->reason;
   int addr = 0;
   int adStatus = 0;
+  MY_LOGICAL te_status = FALSE;
+  PAR_ERROR cam_err = CE_NO_ERROR;
+  int te_status_param = 0;
   const char *functionName = "ADSBIG::writeFloat64";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Entry.\n", functionName);
@@ -299,6 +317,20 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   if (function == ADAcquireTime) {
     if (value > 0) {
       p_Cam->SetExposureTime(value);
+    }
+  } else if (function == ADTemperature) {
+    getIntegerParam(ADSBIGTEStatusParam, &te_status_param);
+    if (te_status_param == 1) {
+      te_status = TRUE;
+    } else {
+      te_status = FALSE;
+    }
+    printf("Setting status: %d, Setpoint Temp: %f\n", te_status, value);
+    if ((cam_err = p_Cam->SetTemperatureRegulation(te_status, value)) != CE_NO_ERROR) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		"%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
+		functionName, p_Cam->GetErrorString(cam_err).c_str());
+      status = asynError;
     }
   }
   
