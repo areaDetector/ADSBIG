@@ -68,8 +68,14 @@ dbpf $(SBIG_PV):ROI1:EnableCallbacks 1
 dbpf $(SBIG_PV):Array1:EnableCallbacks 1
 
 # Set up ROI binning by default for the array plugin
+# We also enable scaling (divide by 4 because we are doing 2x2 binning).
+# We need to force the output data type to be UInt16, otherwise the plugin 
+# will convert to floating point.
 dbpf $(SBIG_PV):ROI1:BinX 2
 dbpf $(SBIG_PV):ROI1:BinY 2
+dbpf $(SBIG_PV):ROI1:DataTypeOut 3
+dbpf $(SBIG_PV):ROI1:EnableScale 1
+dbpf $(SBIG_PV):ROI1:Scale 4
 
 # Set up TIFF plugin auto increment
 dbpf $(SBIG_PV):TIFF1:AutoIncrement 1
