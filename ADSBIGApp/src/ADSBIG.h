@@ -31,6 +31,8 @@
 #define ADSBIGDarkFieldParamString          "ADSBIG_DARK_FIELD"
 #define ADSBIGReadoutModeParamString        "ADSBIG_READOUT_MODE"
 #define ADSBIGPercentCompleteParamString    "ADSBIG_PERCENT_COMPLETE"
+#define ADSBIGTEStatusParamString           "ADSBIG_TE_STATUS"
+#define ADSBIGTEPowerParamString            "ADSBIG_TE_POWER"
 #define ADSBIGLastParamString               "ADSBIG_LAST"
 
 class ADSBIG : public ADDriver {
@@ -69,6 +71,8 @@ class ADSBIG : public ADDriver {
   int ADSBIGDarkFieldParam;
   int ADSBIGReadoutModeParam;
   int ADSBIGPercentCompleteParam;
+  int ADSBIGTEStatusParam;
+  int ADSBIGTEPowerParam;
   int ADSBIGLastParam;
   #define ADSBIG_LAST_PARAM ADSBIGLastParam
   

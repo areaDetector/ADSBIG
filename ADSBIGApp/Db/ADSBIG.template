@@ -89,6 +89,44 @@ record(ai, "$(P)$(R)PercentComplete_RBV")
    field(EGU, "%")
 }
 
+# ///
+# /// Control the TE cooler
+# ///
+record(bo, "$(P)$(R)TEStatus")
+{
+    field(DTYP,"asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_COOLER")
+    field(ZNAM,"Off")  
+    field(ONAM,"On")
+    field(VAL, "0")
+    field(PINI,"YES")
+    info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Readback the TE cooler state
+# ///
+record(bi, "$(P)$(R)TEStatus_RBV")
+{
+    field(DTYP,"asynInt32")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_STATUS")
+    field(ZNAM,"Off")  
+    field(ONAM,"On")
+    field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Read back the TE cooler power
+# ///
+record(ai, "$(P)$(R)TEPower_RBV")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_POWER")
+   field(PREC, "1")
+   field(SCAN, "I/O Intr")
+   field(EGU, "%")
+}
+
 
 
 

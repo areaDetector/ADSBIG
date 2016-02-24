@@ -65,6 +65,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   createParam(ADSBIGDarkFieldParamString, asynParamInt32,    &ADSBIGDarkFieldParam);
   createParam(ADSBIGReadoutModeParamString, asynParamInt32,    &ADSBIGReadoutModeParam);
   createParam(ADSBIGPercentCompleteParamString, asynParamFloat64,  &ADSBIGPercentCompleteParam);
+    createParam(ADSBIGTEStatusParamString, asynParamInt32,    &ADSBIGTEStatusParam);
+  createParam(ADSBIGTEPowerParamString, asynParamFloat64,  &ADSBIGTEPowerParam);
   createParam(ADSBIGLastParamString,      asynParamInt32,    &ADSBIGLastParam);
 
   //Connect to camera here and get library handle
@@ -145,7 +147,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   paramStatus = ((setIntegerParam(ADSBIGReadoutModeParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSBIGPercentCompleteParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADTemperatureActual, 0.0) == asynSuccess) && paramStatus);
-  
+  paramStatus = ((setIntegerParam(ADSBIGTEStatusParam, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSBIGTEPowerParam, 0.0) == asynSuccess) && paramStatus);
 
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
@@ -517,8 +520,11 @@ void ADSBIG::readoutTask(void)
 void ADSBIG::pollingTask(void)
 {
   epicsFloat64 timeout = 1.0;
-  double temperature = 0.0;
   PAR_ERROR cam_err = CE_NO_ERROR;
+  MY_LOGICAL te_status = FALSE;
+  double ccd_temp_set = 0.0;
+  double ccd_temp = 0.0;
+  double te_power = 0.0;
 
   const char* functionName = "ADSBIG::pollingTask";
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Started Polling Thread.\n", functionName);
@@ -550,14 +556,31 @@ void ADSBIG::pollingTask(void)
       }
       setDoubleParam(ADSBIGPercentCompleteParam, (camPercentComplete*100.0));
     } else {
-      if ((cam_err = p_Cam->GetCCDTemperature(temperature)) != CE_NO_ERROR) {
+      /*if ((cam_err = p_Cam->GetCCDTemperature(temperature)) != CE_NO_ERROR) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
 		  "%s. CSBIGCam::GetCCDTemperature returned an error. %s\n", 
 		  functionName, p_Cam->GetErrorString(cam_err).c_str());
-    } else {
+      } else {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
 		  "%s Actual Temperature: %f\n", functionName, temperature);
 	setDoubleParam(ADTemperatureActual, temperature);
+	}*/
+      if ((cam_err = p_Cam->QueryTemperatureStatus(te_status, ccd_temp, ccd_temp_set, te_power)) != CE_NO_ERROR) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		  "%s. CSBIGCam::QueryTemperatureStatus returned an error. %s\n", 
+		  functionName, p_Cam->GetErrorString(cam_err).c_str());
+      } else {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+		  "%s Temperature Status: %d, %f, %f, %f\n", 
+		  functionName, te_status, ccd_temp, ccd_temp_set, te_power);
+	printf("  TE Status: %d\n", te_status);
+	printf("  CCD Temp: %f\n", ccd_temp);
+	printf("  CCD Temp Setpoint: %f\n", ccd_temp_set);
+	printf("  TE Power: %f\n", te_power);
+	setDoubleParam(ADTemperatureActual, ccd_temp);
+	setDoubleParam(ADTemperature, ccd_temp_set);
+	setIntegerParam(ADSBIGTEStatusParam, te_status);
+	setDoubleParam(ADSBIGTEPowerParam, te_power);
       }
     }
 
