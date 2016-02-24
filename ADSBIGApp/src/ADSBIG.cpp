@@ -610,7 +610,7 @@ void ADSBIG::pollingTask(void)
 	setDoubleParam(ADTemperatureActual, ccd_temp);
 	setDoubleParam(ADTemperature, ccd_temp_set);
 	setIntegerParam(ADSBIGTEStatusParam, te_status);
-	setDoubleParam(ADSBIGTEPowerParam, te_power);
+	setDoubleParam(ADSBIGTEPowerParam, te_power*100.0);
       }
     }
 
