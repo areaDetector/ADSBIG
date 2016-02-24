@@ -46,6 +46,7 @@ record(ao, "$(S):AcquireTime") {
    field(DRVL, "0.1")
    field(DRVH, "100")
    field(EGU, "s")
+   field(PREC, "1")
 }
 
 
