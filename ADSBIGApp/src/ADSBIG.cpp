@@ -113,9 +113,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
     printf("%s Camera Height: %d\n", functionName, m_CamHeight);
   }
 
+  //SetSubFrame is called again when we change the ReadoutMode (ie. do on-chip binning).
   p_Cam->SetSubFrame(0, 0, m_CamWidth, m_CamHeight);
-
-  
 
   //Create image object
   p_Img = new CSBIGImg();
