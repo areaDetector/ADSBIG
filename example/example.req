@@ -12,3 +12,6 @@ BL99:Det:SBIG:TIFF1:FileTemplate
 BL99:Det:SBIG:NDAttributesFile
 BL99:Det:SBIG:TIFF1:NDAttributesFile
 BL99:Det:SBIG:ImageMaxOPI
+BL99:Det:SBIG:Temperature
+BL99:Det:SBIG:TEStatus
+
