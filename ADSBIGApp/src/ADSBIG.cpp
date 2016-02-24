@@ -254,7 +254,7 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
 	p_Cam->SetSubFrame(0, 0, m_CamWidth/2, m_CamHeight/2);
 	setIntegerParam(ADSizeX, m_CamWidth/2);
 	setIntegerParam(ADSizeY, m_CamHeight/2);
-      } else if (value = 2) {
+      } else if (value == 2) {
 	p_Cam->SetSubFrame(0, 0, m_CamWidth/3, m_CamHeight/3);
 	setIntegerParam(ADSizeX, m_CamWidth/3);
 	setIntegerParam(ADSizeY, m_CamHeight/3);
