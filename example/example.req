@@ -1,0 +1,14 @@
+BL99:Det:SBIG:AcquireTime
+BL99:Det:SBIG:ReadoutMode
+BL99:Det:SBIG:DarkField
+BL99:Det:SBIG:SizeX
+BL99:Det:SBIG:SizeY
+BL99:Det:SBIG:MinX
+BL99:Det:SBIG:MinY
+BL99:Det:SBIG:TIFF1:FilePath
+BL99:Det:SBIG:TIFF1:FileName
+BL99:Det:SBIG:TIFF1:FileNumber
+BL99:Det:SBIG:TIFF1:FileTemplate
+BL99:Det:SBIG:NDAttributesFile
+BL99:Det:SBIG:TIFF1:NDAttributesFile
+BL99:Det:SBIG:ImageMaxOPI
