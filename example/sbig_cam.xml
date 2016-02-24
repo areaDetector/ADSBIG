@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="no" ?>
+<!-- Attributes -->
+<Attributes
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://epics.aps.anl.gov/areaDetector/attributes ../attributes.xsd"
+    >
+    <!-- DRIVER PARAMS -->
+    <Attribute name="ExposureTime"   type="PARAM"  source="ACQ_TIME"            datatype="DOUBLE"  description="Acquire Time"/>
+    <Attribute name="ImageCounter"   type="PARAM"  source="ARRAY_COUNTER"       datatype="INT"     description="Image counter"/>
+    <Attribute name="MinX"           type="PARAM"  source="MIN_X"               datatype="INT"     description="Min X"/>
+    <Attribute name="MinY"           type="PARAM"  source="MIN_Y"               datatype="INT"     description="Min Y"/>
+    <Attribute name="SizeX"          type="PARAM"  source="SIZE_X"              datatype="INT"     description="Size X"/>
+    <Attribute name="SizeY"          type="PARAM"  source="SIZE_Y"              datatype="INT"     description="Size Y"/>
+    <Attribute name="Binning"        type="PARAM"  source="ADSBIG_READOUT_MODE" datatype="INT"     description="Binning"/>
+    <Attribute name="DarkField"      type="PARAM"  source="ADSBIG_DARK_FIELD"   datatype="INT"     description="Shutter Mode"/>
+    
+    <Attribute name="Temperature"    type="PARAM"  source="TEMPERATURE_ACTUAL"  datatype="DOUBLE"  description="Actual Temperature"/>
+
+</Attributes>

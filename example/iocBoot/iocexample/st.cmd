@@ -75,5 +75,7 @@ dbpf $(SBIG_PV):ROI1:BinY 2
 dbpf $(SBIG_PV):TIFF1:AutoIncrement 1
 dbpf $(SBIG_PV):TIFF1:AutoSave 1
 
-
+# Set the NDAttributesFile paths
+dbpf $(SBIG_PV):NDAttributesFile "/home/controls/epics/ADSBIG/master/example/sbig_cam.xml"
+dbpf $(SBIG_PV):TIFF1:NDAttributesFile "/home/controls/epics/ADSBIG/master/example/sbig_tiff.xml"
 
