@@ -323,7 +323,6 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     } else {
       te_status = FALSE;
     }
-    printf("Setting status: %d, Setpoint Temp: %f\n", te_status, value);
     if ((cam_err = p_Cam->SetTemperatureRegulation(te_status, value)) != CE_NO_ERROR) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
 		"%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
@@ -407,8 +406,8 @@ void ADSBIG::readoutTask(void)
 	break;
       }
 
-      printf("%s Time before acqusition: ", functionName);
-      epicsTime::getCurrent().show(0);
+      //printf("%s Time before acqusition: ", functionName);
+      //epicsTime::getCurrent().show(0);
 
       //Read what type of image we want - light field or dark field?
       int darkField = 0;
@@ -430,14 +429,14 @@ void ADSBIG::readoutTask(void)
       unsigned short binX=0;
       unsigned short binY=0;
       p_Img->GetBinning(binX, binY);
-      printf(" binX: %d\n", binX);
-      printf(" binY: %d\n", binY);
-      printf(" PixelHeight: %f\n", p_Img->GetPixelHeight());
-      printf(" PixelWidth: %f\n", p_Img->GetPixelWidth());
-      printf(" Height: %d\n", p_Img->GetHeight());
-      printf(" Width: %d\n", p_Img->GetWidth());
-      printf(" Readout Mode: %d\n", p_Cam->GetReadoutMode());
-      printf(" Dark Field: %d\n", darkField);
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " BinX: %d\n", binX);
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " BinY: %d\n", binY);
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " PixelHeight: %f\n", p_Img->GetPixelHeight());
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " PixelWidth: %f\n", p_Img->GetPixelWidth());
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " Height: %d\n", p_Img->GetHeight());
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " Width: %d\n", p_Img->GetWidth());
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " Readout Mode: %d\n", p_Cam->GetReadoutMode());
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " Dark Field: %d\n", darkField);
 
       if (!error) {
 
@@ -460,8 +459,8 @@ void ADSBIG::readoutTask(void)
 
       unsigned short *pData = p_Img->GetImagePointer();
 
-      printf("%s Time after acqusition: ", functionName);
-      epicsTime::getCurrent().show(0);
+      //printf("%s Time after acqusition: ", functionName);
+      //epicsTime::getCurrent().show(0);
 
       setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
 
@@ -501,14 +500,6 @@ void ADSBIG::readoutTask(void)
 	  /* Get any attributes that have been defined for this driver */        
           this->getAttributes(pArray->pAttributeList);
 	  pArray->pData = pData;
-	  
-	  printf("  Printing image data: \n");
-                  if (pData != NULL) {
-                    for (int i = 0; i<10; i++) {
-                      printf("   pData[%d]: %d\n", i, pData[i]);
-                    }
-                  } 
-
 
 	  unlock();
 	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s: Calling NDArray callback\n", functionName);
@@ -580,21 +571,11 @@ void ADSBIG::pollingTask(void)
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
 		"%s Cam State: %d. Percent Complete: %f\n", 
 		functionName, camState, (camPercentComplete*100.0));
-      printf("Cam State: %d, Percent Complete: %f\n", camState, (camPercentComplete*100.0));
       if ((camState == GS_DIGITIZING_DARK) || (camState == GS_DIGITIZING_LIGHT)) {
 	setIntegerParam(ADStatus, ADStatusReadout);
       }
       setDoubleParam(ADSBIGPercentCompleteParam, (camPercentComplete*100.0));
     } else {
-      /*if ((cam_err = p_Cam->GetCCDTemperature(temperature)) != CE_NO_ERROR) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		  "%s. CSBIGCam::GetCCDTemperature returned an error. %s\n", 
-		  functionName, p_Cam->GetErrorString(cam_err).c_str());
-      } else {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		  "%s Actual Temperature: %f\n", functionName, temperature);
-	setDoubleParam(ADTemperatureActual, temperature);
-	}*/
       if ((cam_err = p_Cam->QueryTemperatureStatus(te_status, ccd_temp, ccd_temp_set, te_power)) != CE_NO_ERROR) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
 		  "%s. CSBIGCam::QueryTemperatureStatus returned an error. %s\n", 
@@ -603,10 +584,6 @@ void ADSBIG::pollingTask(void)
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
 		  "%s Temperature Status: %d, %f, %f, %f\n", 
 		  functionName, te_status, ccd_temp, ccd_temp_set, te_power);
-	printf("  TE Status: %d\n", te_status);
-	printf("  CCD Temp: %f\n", ccd_temp);
-	printf("  CCD Temp Setpoint: %f\n", ccd_temp_set);
-	printf("  TE Power: %f\n", te_power);
 	setDoubleParam(ADTemperatureActual, ccd_temp);
 	setDoubleParam(ADTemperature, ccd_temp_set);
 	setIntegerParam(ADSBIGTEStatusParam, te_status);
