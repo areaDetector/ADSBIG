@@ -209,8 +209,6 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   int function = pasynUser->reason;
   int addr = 0;
   int adStatus = 0;
-  unsigned short binX = 0;
-  unsigned short binY = 0;
   PAR_ERROR cam_err = CE_NO_ERROR;
   MY_LOGICAL te_status = FALSE;
   double ccd_temp_set = 0;
