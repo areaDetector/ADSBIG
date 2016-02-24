@@ -95,7 +95,7 @@ record(ai, "$(P)$(R)PercentComplete_RBV")
 record(bo, "$(P)$(R)TEStatus")
 {
     field(DTYP,"asynInt32")
-    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_COOLER")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_STATUS")
     field(ZNAM,"Off")  
     field(ONAM,"On")
     field(VAL, "0")
