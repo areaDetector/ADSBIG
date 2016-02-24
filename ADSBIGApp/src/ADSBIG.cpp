@@ -46,8 +46,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   m_CamWidth = 0;
   m_CamHeight = 0;
 
-  //Create the epicsEvent for signaling the data task.
-  //This will cause it to do a poll immediately, rather than wait for the poll time period.
+  //Create the epicsEvents for signaling the readout thread.
   m_startEvent = epicsEventMustCreate(epicsEventEmpty);
   if (!m_startEvent) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s epicsEventCreate failure for start event.\n", functionName);
@@ -61,13 +60,13 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 
   //Add the params to the paramLib 
   //createParam adds the parameters to all param lists automatically (using maxAddr).
-  createParam(ADSBIGFirstParamString,     asynParamInt32,    &ADSBIGFirstParam);
-  createParam(ADSBIGDarkFieldParamString, asynParamInt32,    &ADSBIGDarkFieldParam);
-  createParam(ADSBIGReadoutModeParamString, asynParamInt32,    &ADSBIGReadoutModeParam);
+  createParam(ADSBIGFirstParamString,           asynParamInt32,    &ADSBIGFirstParam);
+  createParam(ADSBIGDarkFieldParamString,       asynParamInt32,    &ADSBIGDarkFieldParam);
+  createParam(ADSBIGReadoutModeParamString,     asynParamInt32,    &ADSBIGReadoutModeParam);
   createParam(ADSBIGPercentCompleteParamString, asynParamFloat64,  &ADSBIGPercentCompleteParam);
-    createParam(ADSBIGTEStatusParamString, asynParamInt32,    &ADSBIGTEStatusParam);
-  createParam(ADSBIGTEPowerParamString, asynParamFloat64,  &ADSBIGTEPowerParam);
-  createParam(ADSBIGLastParamString,      asynParamInt32,    &ADSBIGLastParam);
+  createParam(ADSBIGTEStatusParamString,        asynParamInt32,    &ADSBIGTEStatusParam);
+  createParam(ADSBIGTEPowerParamString,         asynParamFloat64,  &ADSBIGTEPowerParam);
+  createParam(ADSBIGLastParamString,            asynParamInt32,    &ADSBIGLastParam);
 
   //Connect to camera here and get library handle
   printf("%s Connecting to camera...\n", functionName);
@@ -143,10 +142,11 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   paramStatus = ((setIntegerParam(ADTriggerMode, ADTriggerInternal) == asynSuccess) && paramStatus); 
   paramStatus = ((setDoubleParam(ADAcquireTime, 1.0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(NDDataType, NDUInt16) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADTemperatureActual, 0.0) == asynSuccess) && paramStatus);
+
   paramStatus = ((setIntegerParam(ADSBIGDarkFieldParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSBIGReadoutModeParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSBIGPercentCompleteParam, 0.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADTemperatureActual, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSBIGTEStatusParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSBIGTEPowerParam, 0.0) == asynSuccess) && paramStatus);
 
@@ -189,6 +189,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 ADSBIG::~ADSBIG()
 {
   printf("ERROR: ADSBIG::~ADSBIG Called.\n");
+  delete p_Cam;
+  delete p_Img;
 }
 
 /**
