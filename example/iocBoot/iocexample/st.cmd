@@ -7,6 +7,8 @@
 
 cd ${TOP}
 
+epicsEnvSet("SBIG_PV", "BL99:Det:SBIG")
+
 ## Register all support components
 dbLoadDatabase "dbd/example.dbd"
 example_registerRecordDeviceDriver pdbbase
@@ -56,7 +58,22 @@ iocInit
 
 # Create request file and start periodic 'save'
 epicsThreadSleep(5)
-makeAutosaveFileFromDbInfo("$(SAVE_DIR)/$(IOCNAME).req", "autosaveFields")
 create_monitor_set("$(IOCNAME).req", 10)
+
+# Enable plugins at startup (settings that are not autosaved)
+dbpf $(SBIG_PV):ArrayCallbacks 1
+dbpf $(SBIG_PV):TIFF1:EnableCallbacks 1
+dbpf $(SBIG_PV):Stats1:EnableCallbacks 1
+dbpf $(SBIG_PV):ROI1:EnableCallbacks 1
+dbpf $(SBIG_PV):Array1:EnableCallbacks 1
+
+# Set up ROI binning by default for the array plugin
+dbpf $(SBIG_PV):ROI1:BinX 2
+dbpf $(SBIG_PV):ROI1:BinY 2
+
+# Set up TIFF plugin auto increment
+dbpf $(SBIG_PV):TIFF1:AutoIncrement 1
+dbpf $(SBIG_PV):TIFF1:AutoSave 1
+
 
 
