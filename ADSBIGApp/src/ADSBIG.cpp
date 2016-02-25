@@ -225,7 +225,6 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
       m_Acquiring = 1;
       setIntegerParam(ADStatus, ADStatusAcquire);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Start Event.\n", functionName);
-      printf("Sending start event\n");
       epicsEventSignal(this->m_startEvent);
     }
     if ((value==0) && (adStatus != ADStatusIdle)) {
