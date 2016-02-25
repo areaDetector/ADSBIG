@@ -2,6 +2,7 @@
 
 import sys
 import os
+import time
 
 from epics import caget, caput
 
@@ -15,11 +16,12 @@ def main():
 
     caput(base_pv+"AcquireTime", 1, wait=True)
 
-    for i in range(2):
+    for i in range(3):
         print "ReadoutMode: " + str(i)
         caput(base_pv+"ReadoutMode", i, wait=True)
 
-        for image in range(1):
+        for image in range(10):
+            print "Acquire: " + str(i)
             caput(base_pv+"Acquire", 1, wait=True, timeout=20)
             status = caget(base_pv+"DetectorState_RBV")
             if (status != 0):
