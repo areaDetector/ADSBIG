@@ -198,7 +198,32 @@ ADSBIG::~ADSBIG()
  */
 void ADSBIG::report(FILE *fp, int details)
 {
-  printf("TODO\n");
+
+   fprintf(fp, "SBIG Detector Port: %s\n", this->portName);
+
+   if (details > 0) {
+     int ival = 0;
+
+     getIntegerParam(ADSizeX, &ival);
+     fprintf(fp, "  SizeX: %d\n", ival);
+     getIntegerParam(ADSizeY, &ival);
+     fprintf(fp, "  SizeY: %d\n", ival);
+     getIntegerParam(ADBinX, &ival);
+     fprintf(fp, "  BinX: %d\n", ival);
+     getIntegerParam(ADBinY, &ival);
+     fprintf(fp, "  BinY: %d\n", ival);
+     getIntegerParam(ADMaxSizeX, &ival);
+     fprintf(fp, "  Max SizeX: %d\n", ival);
+     getIntegerParam(ADMaxSizeY, &ival);
+     fprintf(fp, "  Max SizeY: %d\n", ival);
+     getIntegerParam(NDDataType, &ival);
+     fprintf(fp, "  NDArray Data Type: %d\n", ival);
+     getIntegerParam(NDArraySize, &ival);
+     fprintf(fp, "  NDArray Size: %d\n", ival);
+
+   }
+   /* Invoke the base class method */
+   ADDriver::report(fp, details);
 }
 
 
