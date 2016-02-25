@@ -409,7 +409,6 @@ void ADSBIG::readoutTask(void)
     }
 
     lock();
-    setIntegerParam(ADAcquire, 0);
     if (!error) {
       setStringParam(ADStatusMessage, "Idle");
     }
