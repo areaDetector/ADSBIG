@@ -328,15 +328,12 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   asynStatus status = asynSuccess;
   int function = pasynUser->reason;
   int addr = 0;
-  int adStatus = 0;
   MY_LOGICAL te_status = FALSE;
   PAR_ERROR cam_err = CE_NO_ERROR;
   int te_status_param = 0;
   const char *functionName = "ADSBIG::writeFloat64";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Entry.\n", functionName);
-
-  getIntegerParam(ADStatus, &adStatus);
 
   if (function == ADAcquireTime) {
     if (value > 0) {
