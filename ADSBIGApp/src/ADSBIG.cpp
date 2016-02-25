@@ -246,7 +246,7 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   getIntegerParam(ADStatus, &adStatus);
 
   if (function == ADAcquire) {
-    if ((value==1) && (adStatus == ADStatusIdle)) {
+    if ((value==1) && ((adStatus == ADStatusIdle) || (adStatus == ADStatusError) || (adStatus == ADStatusAborted))) {
       m_Acquiring = 1;
       setIntegerParam(ADStatus, ADStatusAcquire);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Start Event.\n", functionName);
