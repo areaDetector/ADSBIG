@@ -367,6 +367,7 @@ void ADSBIG::readoutTask(void)
   epicsInt32 sizeY = 0;
   NDDataType_t dataType;
   epicsInt32 iDataType = 0;
+  epicsUInt32 dataSize = 0;
   epicsTimeStamp nowTime;
   NDArray *pArray = NULL;
   PAR_ERROR cam_err = CE_NO_ERROR;
@@ -441,85 +442,94 @@ void ADSBIG::readoutTask(void)
 
       if (!error) {
 
-      //Do exposure
-      callParamCallbacks();
-      unlock();
-      if (darkField > 0) {
-	cam_err = p_Cam->GrabMain(p_Img, SBDF_DARK_ONLY);
-      } else {
-	cam_err = p_Cam->GrabMain(p_Img, SBDF_LIGHT_ONLY);
-      }
-      lock();
-      if (cam_err != CE_NO_ERROR) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. CSBIGCam::GrabMain returned an error. %s\n", 
-  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
-	error = true;
-	setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
-      }
-
-      unsigned short *pData = p_Img->GetImagePointer();
-
-      //printf("%s Time after acqusition: ", functionName);
-      //epicsTime::getCurrent().show(0);
-
-      setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
-
-      //NDArray callbacks
-      int arrayCallbacks = 0;
-      getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
-      getIntegerParam(ADSizeX, &sizeX);
-      getIntegerParam(ADSizeY, &sizeY);
-      getIntegerParam(NDDataType, &iDataType);
-      dataType = static_cast<NDDataType_t>(iDataType);
-      if (dataType == NDUInt8) {
-	setIntegerParam(NDArraySize, sizeX*sizeY*sizeof(epicsUInt8));
-      } else if (dataType == NDUInt16) {
-	setIntegerParam(NDArraySize, sizeX*sizeY*sizeof(epicsUInt16));
-      } else if (dataType == NDUInt32) {
-	setIntegerParam(NDArraySize, sizeX*sizeY*sizeof(epicsUInt32));
-      } else {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. ERROR: We can't handle this data type. dataType: %d\n", 
-		  functionName, dataType);
-      }
-      
-      if (arrayCallbacks) {
-	++arrayCounter;
-	//Allocate an NDArray
-        dims[0] = sizeX;
-        dims[1] = sizeY;
-        if ((pArray = this->pNDArrayPool->alloc(nDims, dims, dataType, 0, NULL)) == NULL) {
-	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. ERROR: pArray is NULL.\n", 
-  	      functionName);
+	//Do exposure
+	callParamCallbacks();
+	unlock();
+	if (darkField > 0) {
+	  cam_err = p_Cam->GrabMain(p_Img, SBDF_DARK_ONLY);
 	} else {
-	  epicsTimeGetCurrent(&nowTime);
-	  pArray->uniqueId = arrayCounter;
-	  pArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
-	  updateTimeStamp(&pArray->epicsTS);
-	  /* Get any attributes that have been defined for this driver */        
-          this->getAttributes(pArray->pAttributeList);
-	  pArray->pData = pData;
-
-	  unlock();
-	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s: Calling NDArray callback\n", functionName);
-	  doCallbacksGenericPointer(pArray, NDArrayData, 0);
-	  lock();
-	  pArray->release();
+	  cam_err = p_Cam->GrabMain(p_Img, SBDF_LIGHT_ONLY);
+	}
+	lock();
+	if (cam_err != CE_NO_ERROR) {
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		    "%s. CSBIGCam::GrabMain returned an error. %s\n", 
+		    functionName, p_Cam->GetErrorString(cam_err).c_str());
+	  error = true;
+	  setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
+	}
+	
+	unsigned short *pData = p_Img->GetImagePointer();
+	
+	//printf("%s Time after acqusition: ", functionName);
+	//epicsTime::getCurrent().show(0);
+	
+	setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
+	
+	//NDArray callbacks
+	int arrayCallbacks = 0;
+	getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
+	getIntegerParam(ADSizeX, &sizeX);
+	getIntegerParam(ADSizeY, &sizeY);
+	getIntegerParam(NDDataType, &iDataType);
+	dataType = static_cast<NDDataType_t>(iDataType);
+	if (dataType == NDUInt8) {
+	  dataSize = sizeX*sizeY*sizeof(epicsUInt8);
+	} else if (dataType == NDUInt16) {
+	  dataSize = sizeX*sizeY*sizeof(epicsUInt16);
+	} else if (dataType == NDUInt32) {
+	  dataSize = sizeX*sizeY*sizeof(epicsUInt32);
+	} else {
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+		    "%s. ERROR: We can't handle this data type. dataType: %d\n", 
+		    functionName, dataType);
+	  error = true;
+	  dataSize = 0;
+	}
+	setIntegerParam(NDArraySize, dataSize);
+	
+	if (!error) {
+	  
+	  if (arrayCallbacks) {
+	    ++arrayCounter;
+	    //Allocate an NDArray
+	    dims[0] = sizeX;
+	    dims[1] = sizeY;
+	    if ((pArray = this->pNDArrayPool->alloc(nDims, dims, dataType, 0, NULL)) == NULL) {
+	      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+			"%s. ERROR: pArray is NULL.\n", 
+			functionName);
+	    } else {
+	      epicsTimeGetCurrent(&nowTime);
+	      pArray->uniqueId = arrayCounter;
+	      pArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
+	      updateTimeStamp(&pArray->epicsTS);
+	      //Get any attributes that have been defined for this driver
+	      this->getAttributes(pArray->pAttributeList);
+	      //We copy data because the SBIG class library holds onto the original buffer until the next acqusition
+	      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+			"%s: Copying data. dataSize: %d\n", functionName, dataSize);
+	      memcpy(pArray->pData, pData, dataSize);
+	        
+	      unlock();
+	      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s: Calling NDArray callback\n", functionName);
+	      doCallbacksGenericPointer(pArray, NDArrayData, 0);
+	      lock();
+	      pArray->release();
+	    }
+	    
+	  }
+	  
+	  setIntegerParam(ADStatus, ADStatusIdle);
+	  
+	} else {
+	  setIntegerParam(ADStatus, ADStatusError);
 	}
 	
       }
-
-      }
-
-      //Complete Acquire callback
-      if (!error) {
-	setIntegerParam(ADStatus, ADStatusIdle);
-      } else {
-	setIntegerParam(ADStatus, ADStatusError);
-      }
+      
       callParamCallbacks();
+      //Complete Acquire callback
       setIntegerParam(ADAcquire, 0);
       callParamCallbacks();
       unlock();
