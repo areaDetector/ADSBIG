@@ -39,12 +39,12 @@ record(longout, "$(S):ImageMaxOPI") {
 # ///
 # /// Restrict AcquireTime to be reasonable values
 # /// For the ST-8300 this is at least 0.1s.
-# /// We also set an upper limit of 100s to prevent user error 
+# /// We also set an upper limit of 600s to prevent excessive user error 
 # /// (and at the moment we can't abort an acqusition.)
 # ///
 record(ao, "$(S):AcquireTime") {
    field(DRVL, "0.1")
-   field(DRVH, "100")
+   field(DRVH, "600")
    field(EGU, "s")
    field(PREC, "1")
 }
