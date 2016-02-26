@@ -7,7 +7,7 @@ import time
 from epics import caget, caput
 
 base_pv = "BL99:Det:SBIG:"
-exposures = [0.1, 1, 10]
+exposures = [0.1, 0.5, 1, 2, 10]
 readout_modes = [0, 1, 2]
 images = 20
 
@@ -28,7 +28,7 @@ def main():
             #Take a dark field
             print "Taking a dark field..."
             caput(base_pv+"DarkField", 1, wait=True)
-            caput(base_pv+"Acquire", 1, wait=True, timeout=20)
+            caput(base_pv+"Acquire", 1, wait=True, timeout=30)
             status = caget(base_pv+"DetectorState_RBV")
             if (status != 0):
                 print "ERROR!"
@@ -42,7 +42,7 @@ def main():
             print "Taking " + str(images) + " images..."
             for image in range(images):
                 print "Acquire: " + str(image)
-                caput(base_pv+"Acquire", 1, wait=True, timeout=20)
+                caput(base_pv+"Acquire", 1, wait=True, timeout=30)
                 status = caget(base_pv+"DetectorState_RBV")
                 if (status != 0):
                     print "ERROR!"
