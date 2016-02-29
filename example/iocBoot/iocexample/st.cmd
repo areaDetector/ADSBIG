@@ -38,7 +38,7 @@ epicsEnvSet SAVE_DIR /tmp/example
 save_restoreSet_Debug(0)
 
 ### status-PV prefix, so save_restore can find its status PV's.
-save_restoreSet_status_prefix("BL99:CS:ADSBIG")
+save_restoreSet_status_prefix("BL99:CS:SBIG:")
 
 set_requestfile_path("$(SAVE_DIR)")
 set_savefile_path("$(SAVE_DIR)")
