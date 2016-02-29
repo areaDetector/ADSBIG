@@ -79,6 +79,8 @@ private:
 	bool							m_FastReadout;
 	bool							m_DualChannelMode;
 
+	bool m_abortExposure;
+
 	struct GRAB_INFO
 	{
 		unsigned short 	vertNBinning, hBin, vBin;
@@ -171,6 +173,11 @@ public:
 	bool GetDualChannelMode()
 	{
 			return m_DualChannelMode;
+	}
+
+	void AbortExposure(void)
+	{
+	  m_abortExposure = true;
 	}
 
 	void SetSubFrame(int nLeft,  int nTop,  int nWidth,  int nHeight);

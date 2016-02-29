@@ -150,6 +150,7 @@ void CSBIGCam::Init()
 	m_eCFWError 			= CFWE_NONE;
 	m_FastReadout 		= false;
 	m_DualChannelMode	= false;
+	m_abortExposure         = false;
 }
 
 /*
@@ -1037,6 +1038,9 @@ PAR_ERROR CSBIGCam::StartExposure(SHUTTER_COMMAND shutterState)
 	{
 		return m_eLastError;
 	}
+
+	//Clear the abort flag in case it was set before this exposure started
+        m_abortExposure = false;
 	
 	// For exposures less than 0.01 seconds use millisecond exposures
 	// Note: This assumes the caller has used the GetCCDInfo command
@@ -1140,7 +1144,6 @@ PAR_ERROR CSBIGCam::EndExposure(void)
 }
 
 /*
-  
 	IsExposueComplete:
 		
 	Query the camera to see if the exposure in progress is complete.
@@ -1152,10 +1155,18 @@ PAR_ERROR CSBIGCam::IsExposureComplete(MY_LOGICAL &complete)
 {
 	QueryCommandStatusParams qcsp;
 	QueryCommandStatusResults qcsr;
-	
+	EndExposureParams eep;
+
 	complete = FALSE;
 	if (CheckLink())
 	{
+	  
+	  if (m_abortExposure) {
+	    eep.ccd = CCD_IMAGING | ABORT_DONT_END;
+	    m_abortExposure = false;
+	    return SBIGUnivDrvCommand(CC_END_EXPOSURE, &eep, NULL);
+	  }
+
 		qcsp.command = CC_START_EXPOSURE;
 		if (SBIGUnivDrvCommand(CC_QUERY_COMMAND_STATUS, &qcsp, &qcsr) == CE_NO_ERROR)
 		{
