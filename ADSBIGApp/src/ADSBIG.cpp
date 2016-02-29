@@ -45,6 +45,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   m_Acquiring = 0;
   m_CamWidth = 0;
   m_CamHeight = 0;
+  m_aborted = false;
 
   //Create the epicsEvents for signaling the readout thread.
   m_startEvent = epicsEventMustCreate(epicsEventEmpty);
@@ -248,19 +249,14 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   if (function == ADAcquire) {
     if ((value==1) && ((adStatus == ADStatusIdle) || (adStatus == ADStatusError) || (adStatus == ADStatusAborted))) {
       m_Acquiring = 1;
+      m_aborted = false;
       setIntegerParam(ADStatus, ADStatusAcquire);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Start Event.\n", functionName);
       epicsEventSignal(this->m_startEvent);
     }
-    if ((value==0) && (adStatus != ADStatusIdle)) {
-      printf("Aborting acqusition. NOTE: I couldn't get this working.\n");
-      //cam_err = p_Cam->EndExposure();
-      //SBIGUnivDrvCommand(CC_END_EXPOSURE, &eep, NULL);
-      //if (cam_err != CE_NO_ERROR) {
-      //	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-      //	"%s. CSBIGCam::EndExposure returned an error. %s\n", 
-      //      functionName, p_Cam->GetErrorString(cam_err).c_str());
-      //}
+    if ((value==0) && ((adStatus != ADStatusIdle) && (adStatus != ADStatusError) && (adStatus != ADStatusAborted))) {
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Abort Exposure.\n", functionName);
+      abortExposure();
     }
   } else if (function == ADSBIGDarkFieldParam) {
     if (value == 1) {
@@ -373,6 +369,18 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   return status;
 }
 
+/**
+ * Abort the current aqusition.
+ * This uses a function I added to the SBIG class library
+ * to make it possible to abort an active exposure. Otherwise
+ * the class library blocks and ties up access to the SBIGUDrv.
+ */
+void ADSBIG::abortExposure(void) 
+{
+  p_Cam->AbortExposure();
+  m_aborted = true;
+}
+
 
 /**
  * Readout thread function
@@ -479,13 +487,17 @@ void ADSBIG::readoutTask(void)
 	  error = true;
 	  setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
 	}
+
+	setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
+
+	if (!m_aborted) { 
 	
 	unsigned short *pData = p_Img->GetImagePointer();
 	
 	//printf("%s Time after acqusition: ", functionName);
 	//epicsTime::getCurrent().show(0);
 	
-	setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
+	
 	
 	//NDArray callbacks
 	int arrayCallbacks = 0;
@@ -545,6 +557,11 @@ void ADSBIG::readoutTask(void)
 	  
 	} else {
 	  setIntegerParam(ADStatus, ADStatusError);
+	}
+
+	} else { //end if (!m_aborted)
+	  setIntegerParam(ADStatus, ADStatusAborted);
+	  m_aborted = false;
 	}
 	
       }

@@ -52,6 +52,7 @@ class ADSBIG : public ADDriver {
  private:
   
   //Private functions go here
+  void abortExposure(void);
 
   //Private static data members
 
@@ -61,6 +62,7 @@ class ADSBIG : public ADDriver {
   CSBIGImg *p_Img;
   int m_CamWidth;
   int m_CamHeight;
+  bool m_aborted;
   
   epicsEventId m_startEvent;
   epicsEventId m_stopEvent;
