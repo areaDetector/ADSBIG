@@ -85,3 +85,10 @@ dbpf $(SBIG_PV):TIFF1:AutoSave 1
 dbpf $(SBIG_PV):NDAttributesFile "/home/controls/epics/ADSBIG/master/example/sbig_cam.xml"
 dbpf $(SBIG_PV):TIFF1:NDAttributesFile "/home/controls/epics/ADSBIG/master/example/sbig_tiff.xml"
 
+# After IOC startup, set the frame sizes. This needs to be done after
+# we have set the binning (via autosave).
+dbpf $(SBIG_PV):MinX.PROC 1
+dbpf $(SBIG_PV):MinY.PROC 1
+dbpf $(SBIG_PV):SizeX.PROC 1
+dbpf $(SBIG_PV):SizeY.PROC 1
+

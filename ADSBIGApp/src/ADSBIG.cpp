@@ -240,9 +240,21 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   PAR_ERROR cam_err = CE_NO_ERROR;
   MY_LOGICAL te_status = FALSE;
   double ccd_temp_set = 0;
+  int minX = 0;
+  int minY = 0;
+  int sizeX = 0;
+  int sizeY = 0;
+  int binning = 0;
   const char *functionName = "ADSBIG::writeInt32";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Entry.\n", functionName);
+
+  //Read the frame sizes 
+  getIntegerParam(ADMinX, &minX);
+  getIntegerParam(ADMinY, &minY);
+  getIntegerParam(ADSizeX, &sizeX);
+  getIntegerParam(ADSizeY, &sizeY);
+  getIntegerParam(ADBinX, &binning);
 
   getIntegerParam(ADStatus, &adStatus);
 
@@ -269,18 +281,22 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   } else if (function == ADSBIGReadoutModeParam) {
       p_Cam->SetReadoutMode(value);
       if (value == 0) {
-	p_Cam->SetSubFrame(0, 0, m_CamWidth, m_CamHeight);
-	setIntegerParam(ADSizeX, m_CamWidth);
-	setIntegerParam(ADSizeY, m_CamHeight);
+	binning = 1;
       } else if (value == 1) {
-	p_Cam->SetSubFrame(0, 0, m_CamWidth/2, m_CamHeight/2);
-	setIntegerParam(ADSizeX, m_CamWidth/2);
-	setIntegerParam(ADSizeY, m_CamHeight/2);
+	binning = 2;
       } else if (value == 2) {
-	p_Cam->SetSubFrame(0, 0, m_CamWidth/3, m_CamHeight/3);
-	setIntegerParam(ADSizeX, m_CamWidth/3);
-	setIntegerParam(ADSizeY, m_CamHeight/3);
+	binning = 3;
       }
+      //If we change the binning, reset the frame sizes. This forces
+      //the frame sizes to be set after the binning mode.
+      //The SubFrame sizes have the be set after we know the binning anyway.
+      p_Cam->SetSubFrame(0, 0, m_CamWidth/binning, m_CamHeight/binning);
+      setIntegerParam(ADMinX, 0);
+      setIntegerParam(ADMinY, 0);
+      setIntegerParam(ADSizeX, m_CamWidth/binning);
+      setIntegerParam(ADSizeY, m_CamHeight/binning);
+      setIntegerParam(ADBinX, binning);
+      setIntegerParam(ADBinY, binning);
   } else if (function == ADSBIGTEStatusParam) {
     getDoubleParam(ADTemperature, &ccd_temp_set);
     if (value == 1) {
@@ -293,6 +309,30 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
 		"%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
 		functionName, p_Cam->GetErrorString(cam_err).c_str());
       status = asynError;
+    }
+  } else if (function == ADMinX) {
+    if (value > ((m_CamWidth/binning) - 1)) {
+      value = (m_CamWidth/binning) - 1;
+    }
+    if ((value + sizeX) > (m_CamWidth/binning)) {
+      sizeX = m_CamWidth/binning - value;
+      setIntegerParam(ADSizeX, sizeX);
+    }
+  } else if (function == ADMinY) {
+    if (value > ((m_CamHeight/binning) - 1)) {
+      value = (m_CamHeight/binning) - 1;
+    }
+    if ((value + sizeY) > (m_CamHeight/binning)) {
+      sizeY = m_CamHeight/binning - value;
+      setIntegerParam(ADSizeY, sizeY);
+    }
+  } else if (function == ADSizeX) {
+    if ((minX + value) > (m_CamWidth/binning)) {
+      value = m_CamWidth/binning - minX;
+    }
+  } else if (function == ADSizeY) {
+    if ((minY + value) > (m_CamHeight/binning)) {
+      value = m_CamHeight/binning - minY;
     }
   }
 
@@ -395,6 +435,8 @@ void ADSBIG::readoutTask(void)
   int nDims = 2;
   epicsInt32 sizeX = 0;
   epicsInt32 sizeY = 0;
+  epicsInt32 minX = 0;
+  epicsInt32 minY = 0;
   NDDataType_t dataType;
   epicsInt32 iDataType = 0;
   epicsUInt32 dataSize = 0;
@@ -440,6 +482,13 @@ void ADSBIG::readoutTask(void)
       //printf("%s Time before acqusition: ", functionName);
       //epicsTime::getCurrent().show(0);
 
+      //Read the frame sizes 
+      getIntegerParam(ADMinX, &minX);
+      getIntegerParam(ADMinY, &minY);
+      getIntegerParam(ADSizeX, &sizeX);
+      getIntegerParam(ADSizeY, &sizeY);
+      p_Cam->SetSubFrame(minX, minY, sizeX, sizeY);
+
       //Read what type of image we want - light field or dark field?
       int darkField = 0;
       getIntegerParam(ADSBIGDarkFieldParam, &darkField);
@@ -457,11 +506,11 @@ void ADSBIG::readoutTask(void)
 	setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
       } 
 
-      unsigned short binX=0;
-      unsigned short binY=0;
+      unsigned short binX = 0;
+      unsigned short binY = 0;
       p_Img->GetBinning(binX, binY);
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " BinX: %d\n", binX);
-      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " BinY: %d\n", binY);
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " binX: %d\n", binY);
+      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " binY: %d\n", binX);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " PixelHeight: %f\n", p_Img->GetPixelHeight());
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " PixelWidth: %f\n", p_Img->GetPixelWidth());
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, " Height: %d\n", p_Img->GetHeight());
@@ -502,8 +551,6 @@ void ADSBIG::readoutTask(void)
 	//NDArray callbacks
 	int arrayCallbacks = 0;
 	getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
-	getIntegerParam(ADSizeX, &sizeX);
-	getIntegerParam(ADSizeY, &sizeY);
 	getIntegerParam(NDDataType, &iDataType);
 	dataType = static_cast<NDDataType_t>(iDataType);
 	if (dataType == NDUInt8) {
