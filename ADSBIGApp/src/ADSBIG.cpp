@@ -139,6 +139,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   paramStatus = ((setIntegerParam(ADBinY, 1) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADMinX, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADMinY, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADNumExposures, 1) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADNumImages, 1) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADImageMode, ADImageSingle) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADTriggerMode, ADTriggerInternal) == asynSuccess) && paramStatus); 
   paramStatus = ((setDoubleParam(ADAcquireTime, 1.0) == asynSuccess) && paramStatus);
