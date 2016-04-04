@@ -14,14 +14,9 @@ DBD += example.dbd
 USR_LDFLAGS += -L/usr/local/lib
 
 # example.dbd will be made up from these files:
-example_DBD += base.dbd
-example_DBD += asyn.dbd
-example_DBD += ADSupport.dbd
-example_DBD += NDPluginSupport.dbd
+example_DBD += commonDriverSupport.dbd
 example_DBD += ADSBIGSupport.dbd
-example_DBD += asSupport.dbd
 example_DBD += devIocStats.dbd
-example_DBD += busySupport.dbd
 example_DBD += sseqRecord.dbd
 
 # example_registerRecordDeviceDriver.cpp derives from example.dbd
@@ -34,10 +29,7 @@ example_SRCS_vxWorks += -nil-
 # Link in the code from the support library
 include $(ADCORE)/ADApp/commonDriverMakefile
 example_LIBS += ADSBIGSupport
-example_LIBS += autosave
 example_LIBS += devIocStats
-example_LIBS += busy
-example_LIBS += calc
 SYS_PROD_LIBS += sbigudrv
 
 # Finally link to the EPICS Base libraries
