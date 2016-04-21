@@ -432,7 +432,6 @@ void ADSBIG::readoutTask(void)
   epicsEventWaitStatus eventStatus;
   epicsFloat64 timeout = 0.001;
   bool error = false;
-  int arrayCounter = 0;
   size_t dims[2];
   int nDims = 2;
   epicsInt32 sizeX = 0;
@@ -444,6 +443,8 @@ void ADSBIG::readoutTask(void)
   epicsUInt32 dataSize = 0;
   epicsTimeStamp nowTime;
   NDArray *pArray = NULL;
+  epicsInt32 numImagesCounter = 0;
+  epicsInt32 imageCounter = 0;
   PAR_ERROR cam_err = CE_NO_ERROR;
 
   const char* functionName = "ADSBIG::readoutTask";
@@ -469,9 +470,7 @@ void ADSBIG::readoutTask(void)
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s Got Start Event.\n", functionName);
       error = false;
       setStringParam(ADStatusMessage, " ");
-      arrayCounter = 0;
       lock();
-      setIntegerParam(NDArrayCounter, arrayCounter);
       setIntegerParam(ADNumImagesCounter, 0);
       setIntegerParam(ADNumExposuresCounter, 0);
 
@@ -547,9 +546,15 @@ void ADSBIG::readoutTask(void)
 	
 	//printf("%s Time after acqusition: ", functionName);
 	//epicsTime::getCurrent().show(0);
-	
-	
-	
+
+	//Update counters
+	getIntegerParam(NDArrayCounter, &imageCounter);
+	imageCounter++;
+	setIntegerParam(NDArrayCounter, imageCounter);
+	getIntegerParam(ADNumImagesCounter, &numImagesCounter);
+	numImagesCounter++;
+	setIntegerParam(ADNumImagesCounter, numImagesCounter);
+
 	//NDArray callbacks
 	int arrayCallbacks = 0;
 	getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
@@ -573,7 +578,6 @@ void ADSBIG::readoutTask(void)
 	if (!error) {
 	  
 	  if (arrayCallbacks) {
-	    ++arrayCounter;
 	    //Allocate an NDArray
 	    dims[0] = sizeX;
 	    dims[1] = sizeY;
@@ -583,7 +587,7 @@ void ADSBIG::readoutTask(void)
 			functionName);
 	    } else {
 	      epicsTimeGetCurrent(&nowTime);
-	      pArray->uniqueId = arrayCounter;
+	      pArray->uniqueId = imageCounter;
 	      pArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
 	      updateTimeStamp(&pArray->epicsTS);
 	      //Get any attributes that have been defined for this driver
