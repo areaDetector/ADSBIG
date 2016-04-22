@@ -21,12 +21,12 @@
 
 TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
 
-ASYN=/home/controls/epics/asyn/master
-ADCORE=/home/controls/epics/ADCore/master
+ASYN=/home/controls/prod/epics/asyn/rel4-26_20150804
+ADCORE=/home/controls/prod/epics/ADCore/rel2-2_20160421
 ADSBIG_VENDOR=$(TOP)/vendor/LinuxDevKit/x86/c/testapp
 
 # EPICS_BASE usually appears last so other apps can override stuff:
-EPICS_BASE=/home/controls/epics/base/master
+EPICS_BASE=/home/controls/prod/epics/base/rel3.14.12.4_20140619
 
 # Set RULES here if you want to take build rules from somewhere
 # other than EPICS_BASE:
