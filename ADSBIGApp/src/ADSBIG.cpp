@@ -33,11 +33,11 @@ static void ADSBIGPollingTaskC(void *drvPvt);
  */
 ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) : 
   ADDriver(portName, 1, NUM_DRIVER_PARAMS, 
-	     maxBuffers, maxMemory, 
-	     asynInt32Mask | asynInt32ArrayMask | asynDrvUserMask,
-	     asynInt32Mask | asynFloat64Mask, 
-	     ASYN_CANBLOCK | ASYN_MULTIDEVICE,
-	     1, 0, 0) 
+             maxBuffers, maxMemory, 
+             asynInt32Mask | asynInt32ArrayMask | asynDrvUserMask,
+             asynInt32Mask | asynFloat64Mask, 
+             ASYN_CANBLOCK | ASYN_MULTIDEVICE,
+             1, 0, 0) 
 {
   int status = 0;
   const char *functionName = "ADSBIG::ADSBIG";
@@ -75,25 +75,25 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   PAR_ERROR cam_err = CE_NO_ERROR;
   if (p_Cam == NULL) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		"%s. CSBIGCam constructor failed. p_Cam is NULL.\n", functionName);
+                "%s. CSBIGCam constructor failed. p_Cam is NULL.\n", functionName);
     return;
   }
   if ((cam_err = p_Cam->GetError()) != CE_NO_ERROR) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		"%s. CSBIGCam constructor failed. %s\n", 
-	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+                "%s. CSBIGCam constructor failed. %s\n", 
+              functionName, p_Cam->GetErrorString(cam_err).c_str());
     return;
   }
 
   if ((cam_err = p_Cam->EstablishLink()) != CE_NO_ERROR) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		"%s. Failed to establish link to camera. %s\n", 
-	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+                "%s. Failed to establish link to camera. %s\n", 
+              functionName, p_Cam->GetErrorString(cam_err).c_str());
     return;
   }
 
   printf("%s Successfully connected to camera: %s\n", 
-	 functionName, p_Cam->GetCameraTypeString().c_str());
+         functionName, p_Cam->GetCameraTypeString().c_str());
 
   //Set some default camera modes
   p_Cam->SetActiveCCD(CCD_IMAGING);
@@ -107,8 +107,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 
   if ((cam_err = p_Cam->GetFullFrame(m_CamWidth, m_CamHeight)) !=  CE_NO_ERROR) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. Failed to read camera dimensions. %s\n", 
-  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
+                "%s. Failed to read camera dimensions. %s\n", 
+              functionName, p_Cam->GetErrorString(cam_err).c_str());
     return;
   } else {
     printf("%s Camera Width: %d\n", functionName, m_CamWidth);
@@ -122,8 +122,8 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
   p_Img = new CSBIGImg();
   if (p_Img->AllocateImageBuffer(m_CamWidth, m_CamHeight) != TRUE) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. Failed to allocate image buffer for maximum image size.\n", 
-  	      functionName);
+                "%s. Failed to allocate image buffer for maximum image size.\n", 
+              functionName);
     return;
   }
 
@@ -155,7 +155,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
 
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-	      "%s Unable To Set Driver Parameters In Constructor.\n", functionName);
+              "%s Unable To Set Driver Parameters In Constructor.\n", functionName);
     return;
   }
 
@@ -167,7 +167,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
                             this) == NULL);
   if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-	      "%s epicsThreadCreate failure for ADSBIGReadoutTask.\n", functionName);
+              "%s epicsThreadCreate failure for ADSBIGReadoutTask.\n", functionName);
     return;
   }
 
@@ -179,7 +179,7 @@ ADSBIG::ADSBIG(const char *portName, int maxBuffers, size_t maxMemory) :
                             this) == NULL);
   if (status) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-	      "%s epicsThreadCreate failure for ADSBIGPollingTask.\n", functionName);
+              "%s epicsThreadCreate failure for ADSBIGPollingTask.\n", functionName);
     return;
   }
 
@@ -275,19 +275,19 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
   } else if (function == ADSBIGDarkFieldParam) {
     if (value == 1) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"%s Setting Dark Field Mode.\n", functionName);
+                "%s Setting Dark Field Mode.\n", functionName);
     } else {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"%s Setting Light Field Mode.\n", functionName);
+                "%s Setting Light Field Mode.\n", functionName);
     }
   } else if (function == ADSBIGReadoutModeParam) {
       p_Cam->SetReadoutMode(value);
       if (value == 0) {
-	binning = 1;
+        binning = 1;
       } else if (value == 1) {
-	binning = 2;
+        binning = 2;
       } else if (value == 2) {
-	binning = 3;
+        binning = 3;
       }
       //If we change the binning, reset the frame sizes. This forces
       //the frame sizes to be set after the binning mode.
@@ -308,8 +308,8 @@ asynStatus ADSBIG::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
     if ((cam_err = p_Cam->SetTemperatureRegulation(te_status, ccd_temp_set)) != CE_NO_ERROR) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		"%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
-		functionName, p_Cam->GetErrorString(cam_err).c_str());
+                "%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
+                functionName, p_Cam->GetErrorString(cam_err).c_str());
       status = asynError;
     }
   } else if (function == ADMinX) {
@@ -386,8 +386,8 @@ asynStatus ADSBIG::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     }
     if ((cam_err = p_Cam->SetTemperatureRegulation(te_status, value)) != CE_NO_ERROR) {
       asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		"%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
-		functionName, p_Cam->GetErrorString(cam_err).c_str());
+                "%s. CSBIGCam::SetTemperatureRegulation returned an error. %s\n", 
+                functionName, p_Cam->GetErrorString(cam_err).c_str());
       status = asynError;
     }
   }
@@ -476,8 +476,8 @@ void ADSBIG::readoutTask(void)
 
       //Sanity checks
       if ((p_Cam == NULL) || (p_Img == NULL)) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s NULL pointer.\n", functionName);
-	break;
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s NULL pointer.\n", functionName);
+        break;
       }
 
       //printf("%s Time before acqusition: ", functionName);
@@ -495,16 +495,16 @@ void ADSBIG::readoutTask(void)
       getIntegerParam(ADSBIGDarkFieldParam, &darkField);
 
       if (darkField > 0) {
-	cam_err = p_Cam->GrabSetup(p_Img, SBDF_DARK_ONLY);
+        cam_err = p_Cam->GrabSetup(p_Img, SBDF_DARK_ONLY);
       } else {
-	cam_err = p_Cam->GrabSetup(p_Img, SBDF_LIGHT_ONLY);
+        cam_err = p_Cam->GrabSetup(p_Img, SBDF_LIGHT_ONLY);
       }
       if (cam_err != CE_NO_ERROR) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-  		"%s. CSBIGCam::GrabSetup returned an error. %s\n", 
-  	      functionName, p_Cam->GetErrorString(cam_err).c_str());
-	error = true;
-	setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+                "%s. CSBIGCam::GrabSetup returned an error. %s\n", 
+              functionName, p_Cam->GetErrorString(cam_err).c_str());
+        error = true;
+        setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
       } 
 
       unsigned short binX = 0;
@@ -521,102 +521,102 @@ void ADSBIG::readoutTask(void)
 
       if (!error) {
 
-	//Do exposure
-	callParamCallbacks();
-	unlock();
-	if (darkField > 0) {
-	  cam_err = p_Cam->GrabMain(p_Img, SBDF_DARK_ONLY);
-	} else {
-	  cam_err = p_Cam->GrabMain(p_Img, SBDF_LIGHT_ONLY);
-	}
-	lock();
-	if (cam_err != CE_NO_ERROR) {
-	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		    "%s. CSBIGCam::GrabMain returned an error. %s\n", 
-		    functionName, p_Cam->GetErrorString(cam_err).c_str());
-	  error = true;
-	  setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
-	}
+        //Do exposure
+        callParamCallbacks();
+        unlock();
+        if (darkField > 0) {
+          cam_err = p_Cam->GrabMain(p_Img, SBDF_DARK_ONLY);
+        } else {
+          cam_err = p_Cam->GrabMain(p_Img, SBDF_LIGHT_ONLY);
+        }
+        lock();
+        if (cam_err != CE_NO_ERROR) {
+          asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+                    "%s. CSBIGCam::GrabMain returned an error. %s\n", 
+                    functionName, p_Cam->GetErrorString(cam_err).c_str());
+          error = true;
+          setStringParam(ADStatusMessage, p_Cam->GetErrorString(cam_err).c_str());
+        }
 
-	setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
+        setDoubleParam(ADSBIGPercentCompleteParam, 100.0);
 
-	if (!m_aborted) { 
-	
-	unsigned short *pData = p_Img->GetImagePointer();
-	
-	//printf("%s Time after acqusition: ", functionName);
-	//epicsTime::getCurrent().show(0);
+        if (!m_aborted) { 
+        
+        unsigned short *pData = p_Img->GetImagePointer();
+        
+        //printf("%s Time after acqusition: ", functionName);
+        //epicsTime::getCurrent().show(0);
 
-	//Update counters
-	getIntegerParam(NDArrayCounter, &imageCounter);
-	imageCounter++;
-	setIntegerParam(NDArrayCounter, imageCounter);
-	getIntegerParam(ADNumImagesCounter, &numImagesCounter);
-	numImagesCounter++;
-	setIntegerParam(ADNumImagesCounter, numImagesCounter);
+        //Update counters
+        getIntegerParam(NDArrayCounter, &imageCounter);
+        imageCounter++;
+        setIntegerParam(NDArrayCounter, imageCounter);
+        getIntegerParam(ADNumImagesCounter, &numImagesCounter);
+        numImagesCounter++;
+        setIntegerParam(ADNumImagesCounter, numImagesCounter);
 
-	//NDArray callbacks
-	int arrayCallbacks = 0;
-	getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
-	getIntegerParam(NDDataType, &iDataType);
-	dataType = static_cast<NDDataType_t>(iDataType);
-	if (dataType == NDUInt8) {
-	  dataSize = sizeX*sizeY*sizeof(epicsUInt8);
-	} else if (dataType == NDUInt16) {
-	  dataSize = sizeX*sizeY*sizeof(epicsUInt16);
-	} else if (dataType == NDUInt32) {
-	  dataSize = sizeX*sizeY*sizeof(epicsUInt32);
-	} else {
-	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		    "%s. ERROR: We can't handle this data type. dataType: %d\n", 
-		    functionName, dataType);
-	  error = true;
-	  dataSize = 0;
-	}
-	setIntegerParam(NDArraySize, dataSize);
-	
-	if (!error) {
-	  
-	  if (arrayCallbacks) {
-	    //Allocate an NDArray
-	    dims[0] = sizeX;
-	    dims[1] = sizeY;
-	    if ((pArray = this->pNDArrayPool->alloc(nDims, dims, dataType, 0, NULL)) == NULL) {
-	      asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-			"%s. ERROR: pArray is NULL.\n", 
-			functionName);
-	    } else {
-	      epicsTimeGetCurrent(&nowTime);
-	      pArray->uniqueId = imageCounter;
-	      pArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
-	      updateTimeStamp(&pArray->epicsTS);
-	      //Get any attributes that have been defined for this driver
-	      this->getAttributes(pArray->pAttributeList);
-	      //We copy data because the SBIG class library holds onto the original buffer until the next acqusition
-	      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-			"%s: Copying data. dataSize: %d\n", functionName, dataSize);
-	      memcpy(pArray->pData, pData, dataSize);
-	        
-	      unlock();
-	      asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s: Calling NDArray callback\n", functionName);
-	      doCallbacksGenericPointer(pArray, NDArrayData, 0);
-	      lock();
-	      pArray->release();
-	    }
-	    
-	  }
-	  
-	  setIntegerParam(ADStatus, ADStatusIdle);
-	  
-	} else {
-	  setIntegerParam(ADStatus, ADStatusError);
-	}
+        //NDArray callbacks
+        int arrayCallbacks = 0;
+        getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
+        getIntegerParam(NDDataType, &iDataType);
+        dataType = static_cast<NDDataType_t>(iDataType);
+        if (dataType == NDUInt8) {
+          dataSize = sizeX*sizeY*sizeof(epicsUInt8);
+        } else if (dataType == NDUInt16) {
+          dataSize = sizeX*sizeY*sizeof(epicsUInt16);
+        } else if (dataType == NDUInt32) {
+          dataSize = sizeX*sizeY*sizeof(epicsUInt32);
+        } else {
+          asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+                    "%s. ERROR: We can't handle this data type. dataType: %d\n", 
+                    functionName, dataType);
+          error = true;
+          dataSize = 0;
+        }
+        setIntegerParam(NDArraySize, dataSize);
+        
+        if (!error) {
+          
+          if (arrayCallbacks) {
+            //Allocate an NDArray
+            dims[0] = sizeX;
+            dims[1] = sizeY;
+            if ((pArray = this->pNDArrayPool->alloc(nDims, dims, dataType, 0, NULL)) == NULL) {
+              asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+                        "%s. ERROR: pArray is NULL.\n", 
+                        functionName);
+            } else {
+              epicsTimeGetCurrent(&nowTime);
+              pArray->uniqueId = imageCounter;
+              pArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
+              updateTimeStamp(&pArray->epicsTS);
+              //Get any attributes that have been defined for this driver
+              this->getAttributes(pArray->pAttributeList);
+              //We copy data because the SBIG class library holds onto the original buffer until the next acqusition
+              asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+                        "%s: Copying data. dataSize: %d\n", functionName, dataSize);
+              memcpy(pArray->pData, pData, dataSize);
+                
+              unlock();
+              asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s: Calling NDArray callback\n", functionName);
+              doCallbacksGenericPointer(pArray, NDArrayData, 0);
+              lock();
+              pArray->release();
+            }
+            
+          }
+          
+          setIntegerParam(ADStatus, ADStatusIdle);
+          
+        } else {
+          setIntegerParam(ADStatus, ADStatusError);
+        }
 
-	} else { //end if (!m_aborted)
-	  setIntegerParam(ADStatus, ADStatusAborted);
-	  m_aborted = false;
-	}
-	
+        } else { //end if (!m_aborted)
+          setIntegerParam(ADStatus, ADStatusAborted);
+          m_aborted = false;
+        }
+        
       }
       
       callParamCallbacks();
@@ -626,14 +626,14 @@ void ADSBIG::readoutTask(void)
       unlock();
 
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"%s Completed acqusition.\n", functionName);
+                "%s Completed acqusition.\n", functionName);
 
     } //end of start event
 
   } //end of while(1)
 
   asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-	    "%s: ERROR: Exiting ADSBIGReadoutTask main loop.\n", functionName);
+            "%s: ERROR: Exiting ADSBIGReadoutTask main loop.\n", functionName);
 
 }
 
@@ -671,25 +671,25 @@ void ADSBIG::pollingTask(void)
     if ((adStatus == ADStatusAcquire || adStatus == ADStatusReadout)) {
       p_Cam->GetGrabState(camState, camPercentComplete);
       asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		"%s Cam State: %d. Percent Complete: %f\n", 
-		functionName, camState, (camPercentComplete*100.0));
+                "%s Cam State: %d. Percent Complete: %f\n", 
+                functionName, camState, (camPercentComplete*100.0));
       if ((camState == GS_DIGITIZING_DARK) || (camState == GS_DIGITIZING_LIGHT)) {
-	setIntegerParam(ADStatus, ADStatusReadout);
+        setIntegerParam(ADStatus, ADStatusReadout);
       }
       setDoubleParam(ADSBIGPercentCompleteParam, (camPercentComplete*100.0));
     } else {
       if ((cam_err = p_Cam->QueryTemperatureStatus(te_status, ccd_temp, ccd_temp_set, te_power)) != CE_NO_ERROR) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-		  "%s. CSBIGCam::QueryTemperatureStatus returned an error. %s\n", 
-		  functionName, p_Cam->GetErrorString(cam_err).c_str());
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+                  "%s. CSBIGCam::QueryTemperatureStatus returned an error. %s\n", 
+                  functionName, p_Cam->GetErrorString(cam_err).c_str());
       } else {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
-		  "%s Temperature Status: %d, %f, %f, %f\n", 
-		  functionName, te_status, ccd_temp, ccd_temp_set, te_power);
-	setDoubleParam(ADTemperatureActual, ccd_temp);
-	setDoubleParam(ADTemperature, ccd_temp_set);
-	setIntegerParam(ADSBIGTEStatusParam, te_status);
-	setDoubleParam(ADSBIGTEPowerParam, te_power*100.0);
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, 
+                  "%s Temperature Status: %d, %f, %f, %f\n", 
+                  functionName, te_status, ccd_temp, ccd_temp_set, te_power);
+        setDoubleParam(ADTemperatureActual, ccd_temp);
+        setDoubleParam(ADTemperature, ccd_temp_set);
+        setIntegerParam(ADSBIGTEStatusParam, te_status);
+        setDoubleParam(ADSBIGTEPowerParam, te_power*100.0);
       }
     }
 
@@ -700,7 +700,7 @@ void ADSBIG::pollingTask(void)
   }
 
   asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
-	    "%s: ERROR: Exiting ADSBIGPollingTask main loop.\n", functionName);
+            "%s: ERROR: Exiting ADSBIGPollingTask main loop.\n", functionName);
 
 }
 
