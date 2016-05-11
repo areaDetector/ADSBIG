@@ -25,6 +25,7 @@
     <li><a href="#Driver_parameters">SBIG driver specific parameters</a></li>
     <li><a href="#Unsupported">Unsupported standard driver parameters</a></li>
     <li><a href="#Configuration">Configuration</a></li>
+    <li><a href="#Vendor">Vendor software</a></li>
     <li><a href="#CSS_OPI_screens">CSS OPI screens</a></li>
   </ul>
   <h2 id="Introduction">
@@ -39,6 +40,10 @@
     ST-8300. This is a relatively simple CCD camera, and so many
     of the base class parameters are not supported. However, a few parameters that are specific to
     this camera have been implemented.
+  </p>
+  <p>
+    This driver was developed and tested on Red Hat Enterprise Linux 6
+        and 7. 
   </p>
   <h2 id="Driver_parameters">
     SBIG driver specific parameters</h2>
@@ -198,6 +203,17 @@
     The CCD chip on these cameras can be very large (up to 4K * 4K
         pixels). It will be very useful to bin the image for user
         display purposes (eg. 2x2 or 4x4) using the ROI plugin. 
+  </p>
+  <h2 id="Vendor">
+    Vendor Software</h2>
+  <p>
+   A copy of the vendor support software is provided with this
+        driver. Documentation for installing the software can be found
+        in <code>vendor/LinuxDevKit/doc/README.txt</code>.
+    The vendor class library that is used as in interface to the USB
+        driver has a custom modification in order to cater for
+        stopping an active acqusition. Using an unmodified version of
+        the vendor class library will not work with this driver.
   </p>
   <h2 id="CSS_OPI_screens">
     CSS OPI screens</h2>
