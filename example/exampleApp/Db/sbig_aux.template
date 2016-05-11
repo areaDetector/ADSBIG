@@ -1,0 +1,52 @@
+
+#######################################################
+#
+# Auxilary records for the SBIG camera application.
+# NOTE: this has to be loaded after the main areaDetector databses.
+#
+# Macros:
+# S - base PV name
+#
+#######################################################
+
+# ///
+# /// Calculate if we are saturating any pixel
+# ///
+record(calcout, "$(S):MaxPixelCalc") {
+   field(INPA, "65530")
+   field(INPB, "$(STAT)MaxValue_RBV CP MS")
+   field(CALC, "(B>A)?1:0")
+   field(OUT, "$(S):MaxPixelState PP MS")
+}
+record(bi, "$(S):MaxPixelState") {
+   field(DESC, "Saturation State")
+   field(ZNAM, "Not Saturated")
+   field(ONAM, "Saturated")
+   field(ZSV, "NO_ALARM")
+   field(OSV, "MAJOR")
+   info(archive, "Monitor, 00:00:01, VAL")
+}
+
+# ///
+# /// PV to hold the value for the scaling slide on the OPI
+# ///
+record(longout, "$(S):ImageMaxOPI") {
+   field(DESC, "Intensity Widget Max")
+   field(PINI, "YES")
+   info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Restrict AcquireTime to be reasonable values
+# /// For the ST-8300 this is at least 0.1s.
+# /// We also set an upper limit of 600s to prevent excessive user error 
+# /// (and at the moment we can't abort an acqusition.)
+# ///
+record(ao, "$(S):AcquireTime") {
+   field(DRVL, "0.1")
+   field(DRVH, "600")
+   field(EGU, "s")
+   field(PREC, "1")
+}
+
+

@@ -1,0 +1,132 @@
+
+######################################################################
+#
+# Template file for the SBIG areaDetector driver.
+#
+# Matt Pearson 
+# Feb 16
+#
+# Macros:
+# P,R - Base PV name
+# PORT - Asyn port name
+# ADDR - Asyn address (set to zero)
+# TIMEOUT - Asyn timeout
+#
+#
+######################################################################
+
+include "ADBase.template"
+
+# ///
+# /// Switch between light field and dark field modes
+# ///
+record(bo, "$(P)$(R)DarkField")
+{
+    field(DTYP,"asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_DARK_FIELD")
+    field(ZNAM,"Light Field")  
+    field(ONAM,"Dark Field")
+    field(VAL, "0")
+    field(PINI,"YES")
+    info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Readback for switch between light field and dark field modes
+# ///
+record(bi, "$(P)$(R)DarkField_RBV")
+{
+    field(DTYP,"asynInt32")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_DARK_FIELD")
+    field(ZNAM,"Light Field")  
+    field(ONAM,"Dark Field")
+    field(SCAN,"I/O Intr")
+}
+
+# ///
+# /// Readout mode
+# ///
+record(mbbo, "$(P)$(R)ReadoutMode")
+{
+    field(DTYP,"asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_READOUT_MODE")
+    field(ZRST, "1x1")
+    field(ZRVL, "0")
+    field(ONST, "2x2")
+    field(ONVL, "1")
+    field(TWST, "3x3")
+    field(TWVL, "2")
+    field(PINI,"YES")
+    info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Readout mode readback
+# ///
+record(mbbi, "$(P)$(R)ReadoutMode_RBV")
+{
+    field(DTYP,"asynInt32")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_READOUT_MODE")
+    field(ZRST, "1x1")
+    field(ZRVL, "0")
+    field(ONST, "2x2")
+    field(ONVL, "1")
+    field(TWST, "3x3")
+    field(TWVL, "2")
+    field(SCAN,"I/O Intr")
+}
+
+# ///
+# /// Read back the calculated acquisition percent complete (exposure + readout).
+# /// This is read from the SBIG class library when we are acquiring.
+# ///
+record(ai, "$(P)$(R)PercentComplete_RBV")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_PERCENT_COMPLETE")
+   field(PREC, "1")
+   field(SCAN, "I/O Intr")
+   field(EGU, "%")
+}
+
+# ///
+# /// Control the TE cooler
+# ///
+record(bo, "$(P)$(R)TEStatus")
+{
+    field(DTYP,"asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_STATUS")
+    field(ZNAM,"Off")  
+    field(ONAM,"On")
+    field(VAL, "0")
+    field(PINI,"YES")
+    info(autosaveFields, "VAL")
+}
+
+# ///
+# /// Readback the TE cooler state
+# ///
+record(bi, "$(P)$(R)TEStatus_RBV")
+{
+    field(DTYP,"asynInt32")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_STATUS")
+    field(ZNAM,"Off")  
+    field(ONAM,"On")
+    field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Read back the TE cooler power
+# ///
+record(ai, "$(P)$(R)TEPower_RBV")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSBIG_TE_POWER")
+   field(PREC, "1")
+   field(SCAN, "I/O Intr")
+   field(EGU, "%")
+}
+
+
+
+

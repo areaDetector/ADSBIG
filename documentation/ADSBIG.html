@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>areaDetector driver for SBIG Astronomical Instrument CCD Cameras</title>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
+</head>
+<body>
+  <div style="text-align: center">
+    <h1 style="text-align: center">
+      areaDetector driver for SBIG Astronomical Instrument CCD Cameras</h1>
+    <h2>
+      May 1, 2016</h2>
+    <h2>
+      Matt Pearson</h2>
+    <h2>
+      Oak Ridge National Laboratory</h2>
+  </div>
+  <p>
+    &nbsp;</p>
+  <h2>
+    Table of Contents</h2>
+  <ul>
+    <li><a href="#Introduction">Introduction</a></li>
+    <li><a href="#Driver_parameters">SBIG driver specific parameters</a></li>
+    <li><a href="#Unsupported">Unsupported standard driver parameters</a></li>
+    <li><a href="#Configuration">Configuration</a></li>
+    <li><a href="#Vendor">Vendor software</a></li>
+    <li><a href="#CSS_OPI_screens">CSS OPI screens</a></li>
+  </ul>
+  <h2 id="Introduction">
+    Introduction</h2>
+  <p>
+    This is an <a href="http://www.aps.anl.gov/epics/">EPICS</a> <a href="areaDetector.html">
+      areaDetector</a> driver for a CCD camera from SBIG Astromonical Instruments. 
+  </p>
+  <p>
+    This driver inherits from <a href="areaDetectorDoc.html#ADDriver">ADDriver</a>.
+    The camera that was used to develop this application was the
+    ST-8300. This is a relatively simple CCD camera, and so many
+    of the base class parameters are not supported. However, a few parameters that are specific to
+    this camera have been implemented.
+  </p>
+  <p>
+    This driver was developed and tested on Red Hat Enterprise Linux 6
+        and 7. libusb1-devel is required.
+  </p>
+  <h2 id="Driver_parameters">
+    SBIG driver specific parameters</h2>
+  <p>
+    The SBIG driver-specific parameters are the following:
+  </p>
+  <table border="1" cellpadding="2" cellspacing="2" style="text-align: left">
+    <tbody>
+      <tr>
+        <td align="center" colspan="7">
+          <b>Parameter Definitions in ADSBIG.cpp and EPICS Record Definitions in ADSBIG.template</b>
+        </td>
+      </tr>
+      <tr>
+        <th>
+          Parameter index variable</th>
+        <th>
+          asyn interface</th>
+        <th>
+          Access</th>
+        <th>
+          Description</th>
+        <th>
+          drvInfo string</th>
+        <th>
+          EPICS record name</th>
+        <th>
+          EPICS record type</th>
+      </tr>
+      <tr>
+        <td>
+          ADSBIGDarkFieldParam</td>
+        <td>
+          asynInt32</td>
+        <td>
+          r/w</td>
+        <td>
+          Switch between light field (shutter open) and dark field
+          (shutter closed) modes</td>
+        <td>
+          ADSBIG_DARK_FIELD</td>
+        <td>
+          $(P)$(R)DarkField<br />
+          $(P)$(R)DarkField_RBV</td>
+        <td>
+          bo<br />
+          bi</td>
+      </tr>
+      <tr>
+        <td>
+          ADSBIGReadoutModeParam</td>
+        <td>
+          asynInt32</td>
+        <td>
+          r/w</td>
+        <td>
+          Readout (binning) mode. 1x1, 2x2 or 3x3 on chip binning.</td>
+        <td>
+          ADSBIG_READOUT_MODE</td>
+        <td>
+          $(P)$(R)ReadoutMode<br />
+          $(P)$(R)ReadoutMode_RBV</td>
+        <td>
+          mbbo<br />
+          mbbi</td>
+      </tr>
+      <tr>
+        <td>
+          ADSBIGPercentCompleteParam</td>
+        <td>
+          asynFloat64</td>
+        <td>
+          read only</td>
+        <td>
+          Read back the calculated acquisition percent complete
+        (exposure + readout).
+	  This is read from the SBIG class library when we are acquiring.</td>
+        <td>
+          ADSBIG_PERCENT_COMPLETE</td>
+        <td>
+          $(P)$(R)PercentComplete_RBV</td>
+        <td>
+          ai</td>
+      </tr>
+      <tr>
+        <td>
+          ADSBIGTEStatusParam</td>
+        <td>
+          asynInt32</td>
+        <td>
+          r/w</td>
+        <td>
+          Control the TE cooler</td>
+        <td>
+          ADSBIG_TE_STATUS</td>
+        <td>
+          $(P)$(R)TEStatus<br />
+          $(P)$(R)TEStatus_RBV</td>
+        <td>
+          bo<br />
+          bi</td>
+      </tr>
+      <tr>
+        <td>
+          ADSBIGTEPowerParam</td>
+        <td>
+          asynFloat64</td>
+        <td>
+          read only</td>
+        <td>
+          Read back the TE power (%)</td>
+        <td>
+          ADSBIG_TE_POWER</td>
+        <td>
+          $(P)$(R)TEPower_RBV</td>
+        <td>
+          ai</td>
+      </tr>
+    </tbody>
+  </table>
+  <h2 id="Unsupported">
+    Unsupported standard driver parameters</h2>
+  <ul>
+    <li>Number of exposures per image (ADNumExposures)</li>
+    <li>Trigger mode (ADTriggerMode)</li>
+    <li>Acquire period. No camera support for multi image acquisition</li>
+    <li>Frame type (ADFrameType)</li>
+    <li>Gain modes (ADGain)</li>
+    <li>X/Y binning modes (ADBinX and ADBinY). Use SBIGReadoutMode
+        instead.</li>
+    <li>ADReverseX and ADReverseY</li>
+    <li>File control: No file I/O is supported</li>
+    <li>Shutter: No shutter modes are supported</li>
+  </ul>
+  <h2 id="Configuration">
+    Configuration</h2>
+  <p>
+    The SBIG driver is created with the ADSBIGConfig command, either from
+    C/C++ or from the EPICS IOC shell.</p>
+  <pre>asynStatus ADSBIGConfig(const char *portName, int maxBuffers, size_t maxMemory)
+  </pre>
+  <p>
+    Where:
+    <ul>
+      <li>portname - the Asyn port name for the camera driver</li>
+      <li>maxBuffers - Used by asynPortDriver (set to -1 for
+        unlimited)</li>
+      <li>maxMemory - Used by asynPortDriver (set to -1 for
+        unlimited)</li>	
+    </ul>
+  </p>
+  <p>
+    There is an example IOC and startup script 
+    provided in the repository.
+  </p>
+  <p>
+    The CCD chip on these cameras can be very large (up to 4K * 4K
+        pixels). It will be very useful to bin the image for user
+        display purposes (eg. 2x2 or 4x4) using the ROI plugin. 
+  </p>
+  <h2 id="Vendor">
+    Vendor Software</h2>
+  <p>
+   A copy of the vendor support software is provided with this
+        driver. Documentation for installing the software can be found
+        in <code>vendor/LinuxDevKit/doc/README.txt</code>.
+    The vendor class library that is used as in interface to the USB
+        driver has a custom modification in order to cater for
+        stopping an active acqusition. Using an unmodified version of
+        the vendor class library will not work with this driver.
+  </p>
+  <h2 id="CSS_OPI_screens">
+    CSS OPI screens</h2>
+  <p>
+    The following is an example CSS OPI screen showing the camera
+        specific parameters and the output waveform from an StdArray plugin.
+  </p>
+  <div style="text-align: center">
+    <h3>
+      ADSBIG.opi</h3>
+    <img alt="ADSBIG.png" src="ADSBIG.png" height="600" width="1024"/>
+  </div>
+</body>
+</html>
