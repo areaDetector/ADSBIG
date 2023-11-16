@@ -441,7 +441,6 @@ void ADSBIG::readoutTask(void)
   NDDataType_t dataType;
   epicsInt32 iDataType = 0;
   epicsUInt32 dataSize = 0;
-  epicsTimeStamp nowTime;
   NDArray *pArray = NULL;
   epicsInt32 numImagesCounter = 0;
   epicsInt32 imageCounter = 0;
@@ -586,10 +585,9 @@ void ADSBIG::readoutTask(void)
                         "%s. ERROR: pArray is NULL.\n", 
                         functionName);
             } else {
-              epicsTimeGetCurrent(&nowTime);
               pArray->uniqueId = imageCounter;
-              pArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
               updateTimeStamp(&pArray->epicsTS);
+              pArray->timeStamp = pArray->epicsTS.secPastEpoch + pArray->epicsTS.nsec / 1.e9;
               //Get any attributes that have been defined for this driver
               this->getAttributes(pArray->pAttributeList);
               //We copy data because the SBIG class library holds onto the original buffer until the next acqusition
