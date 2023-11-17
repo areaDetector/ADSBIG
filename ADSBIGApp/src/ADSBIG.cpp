@@ -586,8 +586,7 @@ void ADSBIG::readoutTask(void)
                         functionName);
             } else {
               pArray->uniqueId = imageCounter;
-              updateTimeStamp(&pArray->epicsTS);
-              pArray->timeStamp = pArray->epicsTS.secPastEpoch + pArray->epicsTS.nsec / 1.e9;
+              updateTimeStamps(pArray);
               //Get any attributes that have been defined for this driver
               this->getAttributes(pArray->pAttributeList);
               //We copy data because the SBIG class library holds onto the original buffer until the next acqusition
